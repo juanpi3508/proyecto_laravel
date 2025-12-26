@@ -1,0 +1,1234 @@
+:root{
+    /* Colores de marca - Paleta de Mercado */
+    --brand: #FFAD33; /* Orange - Color principal */
+    --brand-secondary: #66974A; /* Asparagus - Verde */
+    --brand-accent: #CC1400; /* Engine Red - Rojo */
+    --ink: #4C57A9; /* Violet Blue - Azul para texto */
+    --light-bg: #f5f5dc; /* Beige claro */
+
+    /* Otros */
+    --card-radius: 1rem;
+    --shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+
+/* Importar tipografía Arsenica Antiqua */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:wght@400;600;700&display=swap');
+
+/* Tipografías */
+body {
+    font-family: 'Crimson Text', Georgia, serif;
+    color: var(--ink);
+    background-color: var(--light-bg);
+    font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 700;
+    color: var(--brand);
+    letter-spacing: 0.5px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    letter-spacing: 0;
+    font-weight: 800;
+}
+
+h2 {
+    font-size: 2rem;
+    letter-spacing: 0;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+/* Navbar */
+.navbar-brand {
+    letter-spacing: 1.5px;
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+}
+.navbar-nav .nav-link.active { font-weight: 700; }
+.navbar {
+    background-color: var(--brand) !important;
+}
+.navbar .nav-link {
+    color: var(--ink) !important;
+    font-family: 'Crimson Text', serif;
+    font-weight: 500;
+}
+.navbar .nav-link:hover {
+    color: var(--brand-accent) !important;
+}
+
+/* Header - MEJORADO PARA MEJOR VISIBILIDAD */
+header {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-accent) 100%);
+    color: white;
+    position: relative;
+}
+
+/* Mejora de legibilidad del texto */
+header h1,
+header .display-5 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    color: white !important;
+}
+
+header p,
+header .lead {
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+header .btn-primary {
+    background-color: white;
+    color: var(--brand-accent);
+    border: none;
+    font-family: 'Crimson Text', serif;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+header .btn-primary:hover {
+    background-color: var(--ink);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    transition: transform .2s;
+    background-color: white;
+}
+.card:hover {
+    transform: scale(1.02);
+}
+
+/* Footer */
+footer {
+    font-size: .9rem;
+    letter-spacing: .2px;
+    background-color: var(--ink);
+    color: var(--light-bg);
+}
+
+/* ========================================
+   ESTILOS PARA PÁGINA DE PRODUCTO
+   ======================================== */
+
+/* Breadcrumb */
+.breadcrumb-item a {
+    color: var(--brand);
+}
+
+/* Imágenes del producto */
+.product-image-main {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: var(--card-radius);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.product-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.product-thumbnail:hover,
+.product-thumbnail.active {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(57, 113, 184, 0.2);
+}
+
+/* Sección de precio lateral */
+.price-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+}
+
+/* Rating de estrellas */
+.star-rating {
+    color: #ffa41c;
+}
+
+/* Badge de descuento */
+.badge-discount {
+    background: var(--brand);
+    font-size: 0.875rem;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Botones de acción */
+.btn-add-cart {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-accent) 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-family: 'Crimson Text', serif;
+}
+
+.btn-add-cart:hover {
+    background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 173, 51, 0.5);
+}
+
+.btn-buy-now {
+    background: white;
+    border: 2px solid var(--brand-accent);
+    color: var(--brand-accent);
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-family: 'Crimson Text', serif;
+}
+
+.btn-buy-now:hover {
+    background: var(--brand-accent);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(204, 20, 0, 0.4);
+}
+
+
+
+/* Productos relacionados - Imágenes */
+.related-product .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Productos relacionados */
+.related-product {
+    transition: transform 0.2s;
+}
+
+.related-product:hover {
+    transform: translateY(-5px);
+}
+
+/* Badge de stock */
+.badge-stock {
+    background: var(--brand-secondary);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Precio anterior tachado */
+.price-old {
+    text-decoration: line-through;
+    color: #999;
+}
+
+/* Precio del producto */
+.product-price {
+    color: var(--brand);
+}
+
+/* Enlaces del producto */
+.product-link {
+    color: var(--brand);
+}
+
+.product-link:hover {
+    color: var(--brand-secondary);
+}
+
+/* Títulos de sección del producto */
+.product-section-title {
+    color: var(--brand);
+    font-family: 'Cinzel', serif;
+}
+
+/* ========================================
+   ESTILOS PARA CARRITO
+   ======================================== */
+
+/* Ocultar flechas del input number */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .product-thumbnail {
+        width: 50px;
+        height: 50px;
+    }
+
+    .color-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .price-section {
+        position: static !important;
+    }
+
+    .feature-icon {
+        font-size: 1.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========================================
+   ESTILOS PARA SIGN UP (Registro)
+   ======================================== */
+
+/* Contenedor principal del SignUp */
+.register-container {
+    min-height: 100vh;
+}
+
+/* Columna izquierda del SignUp */
+.register-left {
+    background: var(--light-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.register-image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Imagen de fondo del SignUp */
+.register-image {
+    width: 100%;
+    height: 100%;
+    background-image: url('https://publicmarkets.nyc/sites/default/files/styles/16x9_md/public/2019-08/leasing-opp-gallery-image-essex-st-market-photo-kreg-holt-nycedc-097.jpg?h=84071268&itok=0oUIQ9dK');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4;
+}
+
+/* Texto sobre la imagen del SignUp */
+.register-text {
+    position: absolute;
+    bottom: 6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    width: 90%;
+}
+
+.register-text h1 {
+    color: var(--light-bg) !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.register-text p {
+    color: var(--light-bg);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Columna derecha del SignUp */
+.register-right {
+    background-color: var(--light-bg);
+}
+
+.register-form-wrapper {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+}
+
+.register-form-wrapper h1 {
+    color: var(--brand);
+}
+
+.register-form-wrapper .text-muted {
+    color: var(--brand) !important;
+}
+
+/* Inputs del SignUp */
+.register-input {
+    background-color: white;
+    border: 1px solid var(--brand);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--brand);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.register-input::placeholder {
+    color: rgba(76, 87, 169, 0.5);
+}
+
+.register-input:focus {
+    background-color: white;
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255, 173, 51, 0.25);
+    outline: none;
+    color: var(--brand);
+}
+
+/* Checkbox del SignUp */
+.register-checkbox {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-color: var(--brand);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.register-checkbox:checked {
+    background-color: var(--brand-secondary);
+    border-color: var(--brand-secondary);
+}
+
+/* Botón principal Sign Up */
+.btn-register {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-accent) 100%);
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    padding: 0.85rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-register:hover {
+    background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 173, 51, 0.5);
+    color: white;
+}
+
+/* Divider OR del SignUp */
+.register-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.register-divider::before,
+.register-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--brand);
+}
+
+.register-divider span {
+    padding: 0 1rem;
+    color: var(--brand);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Enlaces del SignUp */
+.register-link {
+    color: var(--brand) !important;
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.register-link:hover {
+    color: var(--brand-accent) !important;
+    text-decoration: underline;
+}
+.register-link-accent {
+    color: var(--brand) !important;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.register-link-accent:hover {
+    color: var(--brand-accent) !important;
+}
+
+.register-checkbox + .form-check-label,
+.register-check-label {
+    color: var(--brand) !important;
+    font-size: 0.9rem;
+}
+
+.position-relative {
+    position: relative !important;
+}
+
+
+/* ========================================
+   ESTILOS PARA LOGIN
+   ======================================== */
+
+/* Contenedor principal del Login */
+.login-container {
+    min-height: 100vh;
+}
+
+/* Columna izquierda del Login */
+.login-left {
+    background: var(--light-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Imagen de fondo del Login */
+.login-image {
+    width: 100%;
+    height: 100%;
+    background-image: url('../img/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4;
+}
+
+/* Texto sobre la imagen del Login */
+.login-text {
+    position: absolute;
+    bottom: 6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    width: 90%;
+}
+
+.login-text h1 {
+    color: var(--light-bg) !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-text p {
+    color: var(--light-bg);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Columna derecha del Login */
+.login-right {
+    background-color: var(--light-bg);
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+}
+
+/* Título del Login en azul */
+.login-title {
+    color: var(--ink) !important;
+}
+
+/* Subtítulo del Login en azul */
+.login-subtitle {
+    color: var(--ink) !important;
+}
+
+/* Labels del Login */
+.login-label {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* Inputs del Login con borde azul */
+.login-input {
+    background-color: white;
+    border: 1px solid var(--ink) !important;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--ink);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.login-input::placeholder {
+    color: rgba(76, 87, 169, 0.5);
+}
+
+.login-input:focus {
+    background-color: white;
+    border-color: var(--brand-secondary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(76, 87, 169, 0.25) !important;
+    outline: none;
+    color: var(--ink);
+}
+
+/* Botón toggle password del Login */
+.btn-toggle-password-log {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.btn-toggle-password-log:hover {
+    color: var(--brand-secondary);
+}
+
+/* Checkbox del Login */
+.login-checkbox {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-color: var(--ink);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.login-checkbox:checked {
+    background-color: var(--brand-secondary);
+    border-color: var(--brand-secondary);
+}
+
+/* Link "Sign Up" en azul para Login */
+.login-link {
+    color: var(--ink) !important;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.login-link:hover {
+    color: var(--brand-secondary) !important;
+}
+
+/* Link pequeño "¿Olvidó su contraseña?" */
+.login-link-small {
+    color: var(--ink) !important;
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.login-link-small:hover {
+    color: var(--brand-secondary) !important;
+    text-decoration: underline;
+}
+
+/* Botón del Login (azul/verde) */
+.btn-login {
+    background: linear-gradient(135deg, var(--ink) 0%, var(--brand-secondary) 100%) !important;
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    padding: 0.85rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--ink) 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 87, 169, 0.5);
+    color: white;
+}
+
+/* Divider OR del Login */
+.login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--ink);
+}
+
+.login-divider span {
+    padding: 0 1rem;
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Estilos compartidos para ambos */
+.form-check-label {
+    color: var(--ink) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .register-form-wrapper,
+    .login-form-wrapper {
+        padding: 1.5rem;
+    }
+}
+
+/* ============================================
+ESTILOS ADICIONALES PARA COHERENCIA CULTURAL
+Respetando completamente el CSS original del usuario
+============================================ */
+
+/* Mejora de accesibilidad en imágenes */
+.img-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+}
+
+/* Badge cultural ecuatoriano */
+.badge-cultural {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-accent) 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+    margin: 4px;
+    font-family: 'Crimson Text', serif;
+    box-shadow: 0 2px 8px rgba(255, 173, 51, 0.3);
+}
+
+/* Línea decorativa cultural */
+.decorative-line {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, var(--brand), var(--brand-accent));
+    margin: 16px auto;
+    border-radius: 2px;
+}
+
+/* Estadísticas con iconos */
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Íconos de características */
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+/* Animaciones suaves */
+.fade-in {
+    animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover en links de productos */
+.product-link {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.product-link:hover {
+    transform: translateX(5px);
+}
+
+/* Mejora de contraste en header para legibilidad */
+header h1,
+header .display-5 {
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+header p,
+header .lead {
+    color: white !important;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Sección "Sobre Nosotros" con fondo sutil */
+.about-section {
+    background: linear-gradient(to bottom, #FFFFFF 0%, var(--light-bg) 100%);
+}
+
+/* Stats section con mejor espaciado */
+.stats-wrapper {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    flex: 1;
+    min-width: 120px;
+}
+
+.stat-item h4 {
+    color: var(--brand);
+    margin-bottom: 0.25rem;
+}
+
+.stat-item p {
+    color: var(--ink);
+    opacity: 0.8;
+}
+
+/* Texto en footer */
+footer p {
+    margin-bottom: 0.5rem;
+    opacity: 0.95;
+}
+
+/* Responsive para badges */
+@media (max-width: 768px) {
+    .badge-cultural {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+
+    .decorative-line {
+        width: 50px;
+        height: 3px;
+    }
+}
+
+/* ============================================
+   PANTALLAS DE ESTADO DE CARGAS (Loading, Success, Error) para el LogIn
+   ============================================ */
+
+.loading,
+.success,
+.error {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    text-align: center;
+    padding: 2rem;
+    backdrop-filter: blur(5px);
+}
+
+body:has(.loading[style*="display: block"]) footer,
+body:has(.loading[style*="display: block"]) nav,
+body:has(.success[style*="display: block"]) footer,
+body:has(.success[style*="display: block"]) nav,
+body:has(.error[style*="display: block"]) footer,
+body:has(.error[style*="display: block"]) nav {
+    display: none !important;
+}
+
+/* Pantalla de Carga */
+.loading {
+    background: linear-gradient(135deg, var(--light-bg) 0%, var(--light-bg) 100%);
+}
+
+/*Texto de carga*/
+.loading h2 {
+    color: var(--ink);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Spinner animado */
+.loading::after {
+    content: "";
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Pantalla de Éxito */
+.success {
+    background: var(--brand-secondary);
+}
+
+.success h2 {
+    color: white;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    animation: slideInDown 0.5s ease-out;
+}
+
+/* Icono de check animado */
+.success::before {
+    content: "✓";
+    font-size: 3rem;
+    color: white;
+    background-color: green;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    animation: scaleIn 0.5s ease-out;
+}
+
+/* Boton para salir animado */
+.success .btn {
+    animation: slideInUp 0.5s ease-out 0.3s both;
+    background-color: white;
+    color: var(--brand-secondary);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-family: 'Crimson Text', Georgia, serif;
+}
+
+.success .btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Pantalla de Error */
+.error {
+    background: linear-gradient(135deg, var(--brand-accent) 0%, #e57373 100%);
+}
+
+.error h2 {
+    color: white;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    animation: shake 0.5s ease-out;
+}
+
+/* Icono de X animado */
+.error::before {
+    content: "✕";
+    font-size: 3rem;
+    color: white;
+    background-color: red;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    animation: scaleIn 0.5s ease-out;
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-10px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(10px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .loading h2,
+    .success h2,
+    .error h2 {
+        font-size: 1.5rem;
+    }
+
+    .success::before,
+    .error::before {
+        font-size: 3.5rem;
+    }
+}
+
+/* ============================================
+   VALIDACIÓN DE LogIn
+   ============================================ */
+
+/* Input con error */
+.form-control.is-invalid {
+    border-color: var(--brand-accent);
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Input válido */
+.form-control.is-valid {
+    border-color: var(--brand-secondary);
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid:focus {
+    border-color: var(--brand-secondary);
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+/* Mensaje de error */
+.invalid-feedback {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--brand-accent);
+    font-family: 'Crimson Text', Georgia, serif;
+}
+
+/* Ajuste para que el mensaje no desplace el layout */
+.mb-3 {
+    position: relative;
+    margin-bottom: 1.5rem !important;
+}
+
+/* ============================================
+   PANTALLAS DE ESTADO PARA SIGNUP
+   ============================================ */
+
+.loading-signup,
+.success-signup,
+.error-signup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    text-align: center;
+    padding: 2rem;
+    backdrop-filter: blur(5px);
+}
+
+body:has(.loading-signup[style*="display: block"]) footer,
+body:has(.loading-signup[style*="display: block"]) nav,
+body:has(.success-signup[style*="display: block"]) footer,
+body:has(.success-signup[style*="display: block"]) nav,
+body:has(.error-signup[style*="display: block"]) footer,
+body:has(.error-signup[style*="display: block"]) nav {
+    display: none !important;
+}
+
+/* Pantalla de Carga SignUp */
+.loading-signup {
+    background: linear-gradient(135deg, var(--light-bg) 0%, var(--light-bg) 100%);
+}
+
+.loading-signup h2 {
+    color: var(--brand);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-signup::after {
+    content: "";
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Pantalla de Éxito SignUp */
+.success-signup {
+    background: var(--brand-secondary);
+}
+
+.success-signup h2 {
+    color: white;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    animation: slideInDown 0.5s ease-out;
+}
+
+.success-signup::before {
+    content: "✓";
+    font-size: 3rem;
+    color: white;
+    background-color: green;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    animation: scaleIn 0.5s ease-out;
+}
+
+.success-signup .btn {
+    animation: slideInUp 0.5s ease-out 0.3s both;
+    background-color: white;
+    color: var(--brand-secondary);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-family: 'Crimson Text', Georgia, serif;
+}
+
+.success-signup .btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Pantalla de Error SignUp */
+.error-signup {
+    background: linear-gradient(135deg, var(--brand-accent) 0%, #e57373 100%);
+}
+
+.error-signup h2 {
+    color: white;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    animation: shake 0.5s ease-out;
+}
+
+.error-signup::before {
+    content: "✕";
+    font-size: 3rem;
+    color: white;
+    background-color: red;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    animation: scaleIn 0.5s ease-out;
+}
+
+.error-signup .btn {
+    background-color: white;
+    color: var(--brand-accent);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+.error-signup .btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
