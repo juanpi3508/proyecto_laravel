@@ -17,7 +17,7 @@
 
             <li class="breadcrumb-item">
                 <a href="/categorias/{{ $producto->categoria->id_categoria }}" class="text-decoration-none">
-                    {{ $producto->categoria->nombre }}
+                    {{ $producto->categoria->cat_descripcion }}
                 </a>
             </li>
 

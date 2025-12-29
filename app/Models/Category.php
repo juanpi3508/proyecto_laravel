@@ -17,8 +17,7 @@ class Category extends Model
 
     // Campos modificables
     protected $fillable = [
-        'nombre',
-        'estado'
+        'cat_descripcion'
     ];
 
     // Relación: Una categoría tiene muchos productos
