@@ -24,7 +24,7 @@
                         <strong>Tu súper de barrio, ahora más cerca.</strong>
                     </p>
 
-                    <a href="{{ route('productos.index') }}" class="btn btn-primary btn-lg">
+                    <a href="{{ route('catalogo.index') }}" class="btn btn-primary btn-lg">
                         Explorar Productos
                         <i class="bi bi-arrow-right ms-2"></i>
                     </a>
@@ -91,7 +91,7 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="{{ route('productos.index') }}" class="product-link fw-bold">
+                <a href="{{ route('catalogo.index') }}" class="product-link fw-bold">
                     Ver todos los productos →
                 </a>
             </div>
