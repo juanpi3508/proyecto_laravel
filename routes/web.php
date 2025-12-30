@@ -11,8 +11,7 @@ Route::get('/', function () {
 Route::get('/catalogo', [ProductController::class, 'catalogo'])
     ->name('catalogo.index');
 
-Route::get('/productos', [ProductController::class, 'index'])
-    ->name('productos.index');
-
-Route::get('/productos/{id}', [ProductController::class, 'show'])
+Route::get('/productos/{token}', [ProductController::class, 'show'])
+    ->where('token', '.*')
     ->name('productos.show');
+

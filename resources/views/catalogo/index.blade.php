@@ -2,6 +2,10 @@
 
 @section('title', 'KoKo Market | Catálogo')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('content')
 
     <!-- HEADER -->
@@ -67,8 +71,16 @@
             <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-4">
 
                 @foreach($productos as $p)
+                    @php
+                        $token = Crypt::encryptString($p->id_producto);
+                    @endphp
+
                     <div class="col">
-                        <div class="card h-100 shadow-sm border-0">
+                        <a href="{{ route('productos.show', $token) }}"
+                           class="card h-100 shadow-sm border-0 text-decoration-none text-dark"
+                           style="transition: transform .15s ease-in-out;"
+                           onmouseover="this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.transform='translateY(0)'">
 
                             <!-- IMAGEN -->
                             <img src="{{ $p->pro_imagen
@@ -106,7 +118,7 @@
                                 </p>
 
                             </div>
-                        </div>
+                        </a>
                     </div>
                 @endforeach
 
