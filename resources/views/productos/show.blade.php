@@ -2,24 +2,40 @@
 
 @section('title', $producto->pro_descripcion)
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+
+    // Imagen principal
+    $img = $producto->pro_imagen
+        ? asset($producto->pro_imagen)
+        : 'https://via.placeholder.com/600x600?text=Sin+imagen';
+
+    // Precio
+    $precio = $producto->pro_precio_venta;
+    $precioAnterior = $precio / 0.85;
+@endphp
+
 @section('content')
 
     <!-- BREADCRUMB -->
-    <nav aria-label="breadcrumb">
+    <nav aria-label="breadcrumb" class="mt-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="/" class="text-decoration-none">Inicio</a>
+                <a href="{{ route('home') }}" class="text-decoration-none">Inicio</a>
             </li>
 
             <li class="breadcrumb-item">
-                <a href="/catalogo" class="text-decoration-none">Catálogo</a>
+                <a href="{{ route('catalogo.index') }}" class="text-decoration-none">Catálogo</a>
             </li>
 
-            <li class="breadcrumb-item">
-                <a href="/categorias/{{ $producto->categoria->id_categoria }}" class="text-decoration-none">
-                    {{ $producto->categoria->cat_descripcion }}
-                </a>
-            </li>
+            @if($producto->categoria)
+                <li class="breadcrumb-item">
+                    <a href="{{ route('catalogo.index', ['cat' => $producto->categoria->id_categoria]) }}"
+                       class="text-decoration-none">
+                        {{ $producto->categoria->cat_descripcion }}
+                    </a>
+                </li>
+            @endif
 
             <li class="breadcrumb-item active" aria-current="page">
                 {{ $producto->pro_descripcion }}
@@ -34,7 +50,7 @@
 
             <!-- Imagen principal -->
             <div class="mb-3">
-                <img src="{{ asset($producto->imagen) }}"
+                <img src="{{ $img }}"
                      class="product-image-main img-fluid rounded shadow-sm"
                      alt="{{ $producto->pro_descripcion }}">
             </div>
@@ -42,8 +58,8 @@
             <!-- Miniaturas (sin JS, solo repito la misma imagen) -->
             <div class="d-flex gap-2 flex-wrap">
                 @for($i = 0; $i < 4; $i++)
-                    <div class="col-3">
-                        <img src="{{ asset($producto->imagen) }}"
+                    <div style="width:72px;">
+                        <img src="{{ $img }}"
                              class="img-fluid rounded shadow-sm"
                              style="cursor:pointer;">
                     </div>
@@ -56,7 +72,7 @@
 
             <h1 class="h3 fw-bold">{{ $producto->pro_descripcion }}</h1>
 
-            <!-- Rating fake (como tu HTML original) -->
+            <!-- Rating fake -->
             <div class="d-flex align-items-center mb-3">
                 <div class="star-rating me-2">★★★★☆</div>
                 <span class="fw-bold me-2">4.5</span>
@@ -65,26 +81,25 @@
 
             <div class="mb-3">
                 <span class="text-muted small">Categoría:</span>
-                <span class="fw-semibold">{{ $producto->categoria->nombre }}</span>
+                <span class="fw-semibold">
+                    {{ $producto->categoria->cat_descripcion ?? 'Sin categoría' }}
+                </span>
             </div>
 
             <hr>
 
             <!-- Precio -->
-            @php
-                $precio = $producto->pro_precio_venta;
-                $precioAnterior = $precio / 0.85;
-            @endphp
-
             <div class="mb-3">
                 <div class="d-flex align-items-baseline gap-2 mb-1 flex-wrap">
                     <span class="badge badge-discount">-15% OFF</span>
                     <span class="h3 mb-0 fw-bold product-price">
-                    ${{ number_format($precio, 2) }}
-                </span>
+                        ${{ number_format($precio, 2) }}
+                    </span>
                 </div>
                 <div class="text-muted small">
-                    <span class="price-old">Precio anterior: ${{ number_format($precioAnterior, 2) }}</span>
+                    <span class="price-old">
+                        Precio anterior: ${{ number_format($precioAnterior, 2) }}
+                    </span>
                 </div>
             </div>
 
@@ -96,14 +111,14 @@
 
             <!-- Stock -->
             <div class="mb-3 p-3 bg-light rounded">
-                @if($producto->pro_saldo_final > 0)
+                @if(($producto->pro_saldo_fin ?? 0) > 0)
                     <p class="mb-2"><span class="badge-stock">En Stock</span></p>
                 @else
                     <p class="mb-2"><span class="badge bg-danger">Agotado</span></p>
                 @endif
 
                 <p class="small mb-0">
-                    📦 Stock actual: <strong>{{ $producto->pro_saldo_final }}</strong>
+                    📦 Stock actual: <strong>{{ $producto->pro_saldo_fin ?? 0 }}</strong>
                 </p>
             </div>
 
@@ -162,11 +177,19 @@
 
             <div class="row row-cols-2 row-cols-md-4 g-3">
                 @foreach($relacionados as $rel)
+                    @php
+                        $tokenRel = Crypt::encryptString($rel->id_producto);
+
+                        $imgRel = $rel->pro_imagen
+                            ? asset($rel->pro_imagen)
+                            : 'https://via.placeholder.com/600x600?text=Sin+imagen';
+                    @endphp
+
                     <div class="col">
                         <div class="card h-100 shadow-sm">
 
-                            <a href="/productos/{{ $rel->id_producto }}" class="text-decoration-none text-reset">
-                                <img src="{{ asset($rel->imagen) }}"
+                            <a href="{{ route('productos.show', $tokenRel) }}" class="text-decoration-none text-reset">
+                                <img src="{{ $imgRel }}"
                                      class="card-img-top"
                                      style="height:180px; object-fit:cover;"
                                      alt="{{ $rel->pro_descripcion }}">
@@ -174,12 +197,14 @@
 
                             <div class="card-body">
                                 <h6 class="card-title small mb-1 fw-semibold">
-                                    <a href="/productos/{{ $rel->id_producto }}" class="text-reset">
+                                    <a href="{{ route('productos.show', $tokenRel) }}" class="text-reset text-decoration-none">
                                         {{ $rel->pro_descripcion }}
                                     </a>
                                 </h6>
 
-                                <p class="text-muted small mb-2">{{ $rel->categoria->nombre }}</p>
+                                <p class="text-muted small mb-2">
+                                    {{ $rel->categoria->cat_descripcion ?? '' }}
+                                </p>
 
                                 <p class="fw-bold mb-0 product-price">
                                     ${{ number_format($rel->pro_precio_venta, 2) }}

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
+
 
 class ProductController extends Controller
 {
@@ -60,14 +63,20 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($token)
     {
+        try {
+            $id = Crypt::decryptString($token); // aquí recuperas PRD0000001
+        } catch (DecryptException $e) {
+            abort(404); // token inválido
+        }
+
         $producto = Product::with('categoria')
-            ->where('id_producto', $id)
-            ->where('estado_prod', 'A')
+            ->where('id_producto', (string) $id)
+            ->where('estado_prod', 'ACT')
             ->firstOrFail();
 
-        $relacionados = Product::where('estado_prod', 'A')
+        $relacionados = Product::where('estado_prod', 'ACT')
             ->where('id_categoria', $producto->id_categoria)
             ->where('id_producto', '!=', $producto->id_producto)
             ->limit(4)
@@ -75,4 +84,5 @@ class ProductController extends Controller
 
         return view('productos.show', compact('producto', 'relacionados'));
     }
+
 }
