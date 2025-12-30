@@ -23,10 +23,20 @@ class Product extends Model
         'pro_imagen',
         'id_categoria'
     ];
-
-    // Relación con categoría
+// Relación con categoría
     public function categoria()
     {
-        return $this->belongsTo(Category::class, 'id_categoria');
+        return $this->belongsTo(
+            Category::class,
+            'id_categoria',   // FK en products
+            'id_categoria'    // PK en categorias
+        );
     }
+
+    protected $casts = [
+        'id_categoria' => 'string',
+        'id_producto'  => 'string',
+    ];
+
 }
+
