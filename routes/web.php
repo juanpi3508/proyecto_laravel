@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CarritoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,21 @@ Route::get('/catalogo', [ProductController::class, 'catalogo'])
 Route::get('/productos/{token}', [ProductController::class, 'show'])
     ->where('token', '.*')
     ->name('productos.show');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas del Carrito
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('carrito')->name('carrito.')->group(function () {
+    Route::get('/', [CarritoController::class, 'index'])->name('index');
+    Route::post('/', [CarritoController::class, 'store'])->name('store');
+    Route::delete('/vaciar', [CarritoController::class, 'clear'])->name('clear');
+
+    Route::put('/{idProducto}', [CarritoController::class, 'update'])->name('update');
+    Route::delete('/{idProducto}', [CarritoController::class, 'destroy'])->name('destroy');
+});
 
 
 /*
