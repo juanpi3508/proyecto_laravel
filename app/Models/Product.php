@@ -38,5 +38,15 @@ class Product extends Model
         'id_producto'  => 'string',
     ];
 
+    public function detallesCarrito()
+    {
+        return $this->hasMany(
+            DetalleCarrito::class,
+            'id_producto',
+            'id_producto'
+        );
+    }
+
+
 }
 

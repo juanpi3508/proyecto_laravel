@@ -140,26 +140,32 @@
                     </p>
                 </div>
 
-                <div class="mb-3">
-                    <p class="mb-2"><span class="badge-stock">Disponible</span></p>
+                <form method="POST" action="{{ route('carrito.store') }}">
+                    @csrf
 
-                    <label class="form-label small fw-semibold">Cantidad:</label>
-                    <select class="form-select mb-3">
-                        @foreach([1,2,3,4,5,10] as $cant)
-                            <option>{{ $cant }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                    <input type="hidden" name="id_producto" value="{{ $producto->id_producto }}">
 
-                <button class="btn btn-add-cart w-100 mb-2 py-2">
-                    <i class="bi bi-cart-plus me-1"></i>
-                    Agregar al carrito
-                </button>
+                    <div class="mb-3">
+                        <p class="mb-2"><span class="badge-stock">Disponible</span></p>
 
-                <button class="btn btn-buy-now w-100 py-2 mb-3">
+                        <label class="form-label small fw-semibold">Cantidad:</label>
+                        <select name="cantidad" class="form-select mb-3">
+                            @foreach([1,2,3,4,5,10] as $cant)
+                                <option value="{{ $cant }}">{{ $cant }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-add-cart w-100 mb-2 py-2">
+                        <i class="bi bi-cart-plus me-1"></i>
+                        Agregar al carrito
+                    </button>
+                </form>
+
+                <a href="{{ route('carrito.index') }}" class="btn btn-buy-now w-100 py-2 mb-3">
                     <i class="bi bi-lightning-fill me-1"></i>
                     Comprar ahora
-                </button>
+                </a>
 
                 <div class="small text-muted">
                     <p class="mb-2">🔒 Transacción segura</p>
@@ -168,9 +174,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- PRODUCTOS RELACIONADOS -->
+
+        <!-- PRODUCTOS RELACIONADOS -->
     <div class="row mt-5">
         <div class="col-12">
             <h4 class="mb-4 fw-bold product-section-title">Productos relacionados</h4>
