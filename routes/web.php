@@ -31,10 +31,12 @@ Route::get('/productos/{token}', [ProductController::class, 'show'])
 Route::prefix('carrito')->name('carrito.')->group(function () {
     Route::get('/', [CarritoController::class, 'index'])->name('index');
     Route::post('/', [CarritoController::class, 'store'])->name('store');
+    Route::delete('/vaciar', [CarritoController::class, 'clear'])->name('clear');
+
     Route::put('/{idProducto}', [CarritoController::class, 'update'])->name('update');
     Route::delete('/{idProducto}', [CarritoController::class, 'destroy'])->name('destroy');
-    Route::delete('/vaciar', [CarritoController::class, 'clear'])->name('clear');
 });
+
 
 /*
 |--------------------------------------------------------------------------
