@@ -1,3 +1,8 @@
+@php
+    $carritoSesion = session('carrito', []);
+    $cartCount = count($carritoSesion); // ✅ productos diferentes
+@endphp
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ route('home') }}">
@@ -16,13 +21,35 @@
 
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('catalogo.index') }}">Catálogo</a></li>
 
+                {{-- ✅ INICIO --}}
                 <li class="nav-item">
-                    <a class="nav-link" href="/carrito">
+                    <a class="nav-link {{ request()->routeIs('home') ? 'fw-bold active text-white' : '' }}"
+                       href="{{ route('home') }}">
+                        Inicio
+                    </a>
+                </li>
+
+                {{-- ✅ CATÁLOGO --}}
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('catalogo.index') ? 'fw-bold active text-white' : '' }}"
+                       href="{{ route('catalogo.index') }}">
+                        Catálogo
+                    </a>
+                </li>
+
+                {{-- ✅ CARRITO --}}
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('carrito.*') ? 'fw-bold active text-white' : '' }}"
+                       href="{{ route('carrito.index') }}">
                         <i class="bi bi-cart3 me-1"></i> Carrito
-                        <span id="cart-count" class="badge bg-warning text-dark ms-1"></span>
+
+                        {{-- ✅ Badge contador (solo si hay productos) --}}
+                        @if($cartCount > 0)
+                            <span id="cart-count" class="badge bg-warning text-dark ms-1">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
                     </a>
                 </li>
 
@@ -46,11 +73,13 @@
                     </li>
                 @else
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('login') }}">
+                        <a class="nav-link {{ request()->routeIs('login') ? 'fw-bold active text-white' : '' }}"
+                           href="{{ route('login') }}">
                             <i class="bi bi-person-circle me-1"></i> Ingresar
                         </a>
                     </li>
                 @endauth
+
             </ul>
         </div>
     </div>
