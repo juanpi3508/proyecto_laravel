@@ -2,6 +2,10 @@
 
 @section('title', 'KoKo Market | Carrito de Compras')
 
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @section('content')
     <main class="container my-5">
         <div class="row">
@@ -38,12 +42,18 @@
                     </div>
                 @else
                     @foreach($items as $item)
+                        @php
+                            $token = Crypt::encryptString($item->id_producto);
+                        @endphp
+
                         <div class="card mb-3">
                             <div class="card-body">
                                 <div class="row align-items-center text-center">
 
                                     {{-- Producto --}}
                                     <div class="col-5 d-flex align-items-center text-start">
+
+                                        {{-- Eliminar --}}
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
                                               class="me-2">
@@ -54,16 +64,24 @@
                                             </button>
                                         </form>
 
-                                        <img src="{{ asset($item->imagen) }}"
-                                             class="rounded me-3"
-                                             style="width:60px;height:60px;object-fit:cover;">
+                                        {{-- Imagen + Nombre clickeables --}}
+                                        <a href="{{ route('productos.show', $token) }}"
+                                           class="d-flex align-items-center text-decoration-none text-dark">
 
-                                        <div>
-                                            <h6 class="mb-1">{{ $item->descripcion }}</h6>
-                                            <small class="text-muted">
-                                                Stock disponible: {{ $item->stock }}
-                                            </small>
-                                        </div>
+                                            <img src="{{ asset($item->imagen) }}"
+                                                 class="rounded me-3"
+                                                 style="width:60px;height:60px;object-fit:cover;"
+                                                 alt="{{ $item->descripcion }}">
+
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    {{ $item->descripcion }}
+                                                </h6>
+                                                <small class="text-muted">
+                                                    Stock disponible: {{ $item->stock }}
+                                                </small>
+                                            </div>
+                                        </a>
                                     </div>
 
                                     {{-- Precio --}}
@@ -89,7 +107,7 @@
                                                 </button>
                                             </form>
 
-                                            {{-- Input manual (CAMBIO CORRECTO AQUÍ) --}}
+                                            {{-- Input manual --}}
                                             <form method="POST"
                                                   action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
@@ -103,7 +121,6 @@
                                                        style="width:70px;"
                                                        onblur="if(this.value != this.defaultValue) this.form.submit()"
                                                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); if(this.value != this.defaultValue) this.form.submit(); }">
-
                                             </form>
 
                                             {{-- + --}}
@@ -134,7 +151,7 @@
                     @endforeach
                 @endif
 
-                {{-- Vaciar --}}
+                {{-- Vaciar carrito --}}
                 <div class="text-end mt-3">
                     <form method="POST" action="{{ route('carrito.clear') }}">
                         @csrf
@@ -149,7 +166,7 @@
 
             {{-- DERECHA --}}
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top: 80px;">
+                <div class="card sticky-top" style="top:80px;">
                     <div class="card-body">
                         <h5 class="card-title mb-4">Resumen del Pedido</h5>
 
