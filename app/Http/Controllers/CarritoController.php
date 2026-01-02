@@ -25,6 +25,8 @@ class CarritoController extends Controller
 
     public function store(Request $request)
     {
+        $redirect = $request->input('redirect', false);
+
         $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
             'cantidad'    => 'required|integer|min:1'
@@ -57,7 +59,16 @@ class CarritoController extends Controller
 
         $this->saveCarrito($request, $carrito);
 
-        return redirect()->route('carrito.index');
+        if ($redirect) {
+            return redirect()
+                ->route('carrito.index')
+                ->with('success', 'Producto agregado al carrito');
+        }
+
+        return redirect()
+            ->back()
+            ->with('success', 'Producto agregado');
+
     }
 
     public function update(Request $request, string $idProducto)
