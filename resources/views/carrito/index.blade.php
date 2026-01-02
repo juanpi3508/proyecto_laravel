@@ -14,6 +14,25 @@
             <div class="col-lg-8 mb-4">
                 <h2 class="mb-4">Carrito de Compras</h2>
 
+                @if(session('warning'))
+                    <div class="mb-3">
+                        <strong>⚠ Atención:</strong>
+                        {{ session('warning') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="mb-3">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-3">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @if(session('mensaje_stock'))
                     <div class="mb-3">
                         <strong>⚠ Atención:</strong>
@@ -21,7 +40,6 @@
                     </div>
                 @endif
 
-                {{-- Encabezado --}}
                 <div class="card mb-3" style="background-color:#f6e6a5;">
                     <div class="card-body py-2">
                         <div class="row text-center fw-bold">
@@ -50,10 +68,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center text-center">
 
-                                    {{-- Producto --}}
                                     <div class="col-5 d-flex align-items-center text-start">
-
-                                        {{-- Eliminar --}}
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
                                               class="me-2">
@@ -64,7 +79,6 @@
                                             </button>
                                         </form>
 
-                                        {{-- Imagen + Nombre clickeables --}}
                                         <a href="{{ route('productos.show', $token) }}"
                                            class="d-flex align-items-center text-decoration-none text-dark">
 
@@ -74,9 +88,7 @@
                                                  alt="{{ $item->descripcion }}">
 
                                             <div>
-                                                <h6 class="mb-1">
-                                                    {{ $item->descripcion }}
-                                                </h6>
+                                                <h6 class="mb-1">{{ $item->descripcion }}</h6>
                                                 <small class="text-muted">
                                                     Stock disponible: {{ $item->stock }}
                                                 </small>
@@ -84,22 +96,18 @@
                                         </a>
                                     </div>
 
-                                    {{-- Precio --}}
                                     <div class="col-2 fw-semibold">
                                         ${{ number_format($item->precio, 2) }}
                                     </div>
 
-                                    {{-- Cantidad --}}
                                     <div class="col-3">
                                         <div class="d-flex justify-content-center align-items-center gap-1">
 
-                                            {{-- − --}}
                                             <form method="POST"
                                                   action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
                                                 @method('PUT')
-                                                <input type="hidden" name="cantidad"
-                                                       value="{{ $item->cantidad - 1 }}">
+                                                <input type="hidden" name="cantidad" value="{{ $item->cantidad - 1 }}">
                                                 <button type="submit"
                                                         class="btn btn-sm btn-outline-secondary"
                                                     @disabled($item->cantidad <= 1)>
@@ -107,7 +115,6 @@
                                                 </button>
                                             </form>
 
-                                            {{-- Input manual --}}
                                             <form method="POST"
                                                   action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
@@ -123,13 +130,11 @@
                                                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); if(this.value != this.defaultValue) this.form.submit(); }">
                                             </form>
 
-                                            {{-- + --}}
                                             <form method="POST"
                                                   action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
                                                 @method('PUT')
-                                                <input type="hidden" name="cantidad"
-                                                       value="{{ $item->cantidad + 1 }}">
+                                                <input type="hidden" name="cantidad" value="{{ $item->cantidad + 1 }}">
                                                 <button type="submit"
                                                         class="btn btn-sm btn-outline-secondary"
                                                     @disabled($item->cantidad >= $item->stock)>
@@ -140,7 +145,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Subtotal --}}
                                     <div class="col-2 fw-bold">
                                         ${{ number_format($item->subtotal, 2) }}
                                     </div>
@@ -151,7 +155,6 @@
                     @endforeach
                 @endif
 
-                {{-- Vaciar carrito --}}
                 <div class="text-end mt-3">
                     <form method="POST" action="{{ route('carrito.clear') }}">
                         @csrf
@@ -192,13 +195,63 @@
                             <span class="fw-bold fs-5">${{ number_format($total, 2) }}</span>
                         </div>
 
-                        <button class="btn btn-success w-100 py-3 fw-semibold">
-                            Proceder al Pago
-                        </button>
+                        <form method="POST" action="{{ route('factura.generar') }}">
+                            @csrf
+                            <button class="btn btn-success w-100 py-3 fw-semibold"
+                                @disabled($items->isEmpty())>
+                                Proceder al Pago
+                            </button>
+                        </form>
+
                     </div>
                 </div>
             </div>
 
         </div>
     </main>
+
+    @if(session('factura_confirmada'))
+        <div class="modal fade"
+             id="modalConfirmacion"
+             tabindex="-1"
+             data-bs-backdrop="static"
+             data-bs-keyboard="false">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pasarela de Pago</h5>
+                    </div>
+
+                    <div class="modal-body text-center">
+                        <p class="mb-2">Tu compra se realizó correctamente.</p>
+                        <p class="fw-bold">
+                            Factura Nº {{ session('id_factura') }}
+                        </p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <form method="POST"
+                              action="{{ route('factura.aprobar', session('id_factura')) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary">
+                                Aceptar
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                new bootstrap.Modal(
+                    document.getElementById('modalConfirmacion')
+                ).show();
+            });
+        </script>
+    @endif
+
 @endsection

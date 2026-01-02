@@ -47,6 +47,10 @@ class Product extends Model
         );
     }
 
+    public function detallesFactura()
+    {
+        return $this->hasMany(ProxFac::class, 'id_producto', 'id_producto');
+    }
 
 }
 
