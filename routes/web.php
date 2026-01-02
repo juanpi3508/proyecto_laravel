@@ -4,12 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarritoController;
-
-/*
-|--------------------------------------------------------------------------
-| Rutas Públicas
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\FacturaController;
 
 Route::get('/', function () {
     return view('home.index');
@@ -22,27 +17,25 @@ Route::get('/productos/{token}', [ProductController::class, 'show'])
     ->where('token', '.*')
     ->name('productos.show');
 
-/*
-|--------------------------------------------------------------------------
-| Rutas del Carrito
-|--------------------------------------------------------------------------
-*/
-
 Route::prefix('carrito')->name('carrito.')->group(function () {
     Route::get('/', [CarritoController::class, 'index'])->name('index');
     Route::post('/', [CarritoController::class, 'store'])->name('store');
     Route::delete('/vaciar', [CarritoController::class, 'clear'])->name('clear');
-
     Route::put('/{idProducto}', [CarritoController::class, 'update'])->name('update');
     Route::delete('/{idProducto}', [CarritoController::class, 'destroy'])->name('destroy');
 });
 
+Route::post('/factura/generar', [FacturaController::class, 'generarFactura'])
+    ->name('factura.generar');
 
-/*
-|--------------------------------------------------------------------------
-| Rutas de Autenticación
-|--------------------------------------------------------------------------
-*/
+Route::get('/factura/{id}/confirmar', [FacturaController::class, 'confirmar'])
+    ->name('factura.confirmar');
+
+Route::post('/factura/{id}/aprobar', [FacturaController::class, 'aprobar'])
+    ->name('factura.aprobar');
+
+Route::get('/factura/{id}', [FacturaController::class, 'show'])
+    ->name('factura.show');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
