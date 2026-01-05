@@ -37,6 +37,13 @@ Route::post('/factura/{id}/aprobar', [FacturaController::class, 'aprobar'])
 Route::get('/factura/{id}', [FacturaController::class, 'show'])
     ->name('factura.show');
 
+Route::get('/historial-compras', [FacturaController::class, 'listarFacturas'])
+    ->name('facturas.historial');
+
+Route::get('/factura/{id}/popup', [FacturaController::class, 'detallePopup'])
+    ->name('factura.popup');
+
+
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

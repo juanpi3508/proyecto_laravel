@@ -75,25 +75,25 @@ class FacturaController extends Controller
             )->codigo;
 
             Factura::create([
-                'id_factura'   => $idFactura,
-                'id_cliente'   => $cliente->id_cliente,
+                'id_factura' => $idFactura,
+                'id_cliente' => $cliente->id_cliente,
                 'fac_subtotal' => $subtotal,
-                'fac_iva'      => $iva,
-                'fac_total'    => $total,
-                'fac_tipo'     => 'ECO',
-                'estado_fac'   => 'ABR',
+                'fac_iva' => $iva,
+                'fac_total' => $total,
+                'fac_tipo' => 'ECO',
+                'estado_fac' => 'ABR',
             ]);
 
             foreach ($carrito as $item) {
                 $producto = $productos[$item['id_producto']];
 
                 ProxFac::create([
-                    'id_factura'            => $idFactura,
-                    'id_producto'           => $item['id_producto'],
-                    'pxf_cantidad'          => $item['cantidad'],
-                    'pxf_precio_venta'      => $producto->pro_precio_venta,
+                    'id_factura' => $idFactura,
+                    'id_producto' => $item['id_producto'],
+                    'pxf_cantidad' => $item['cantidad'],
+                    'pxf_precio_venta' => $producto->pro_precio_venta,
                     'pxf_subtotal_producto' => $producto->pro_precio_venta * $item['cantidad'],
-                    'estado_pxf'            => 'ABR',
+                    'estado_pxf' => 'ABR',
                 ]);
             }
         });
@@ -132,7 +132,7 @@ class FacturaController extends Controller
                 }
 
                 $producto->pro_qty_egresos += $detalle->pxf_cantidad;
-                $producto->pro_saldo_fin  -= $detalle->pxf_cantidad;
+                $producto->pro_saldo_fin -= $detalle->pxf_cantidad;
                 $producto->save();
 
                 $detalle->estado_pxf = 'APR';
@@ -149,6 +149,51 @@ class FacturaController extends Controller
             ->route('catalogo.index')
             ->with('success', 'Compra realizada correctamente.');
 
+    }
+
+    public function listarFacturas()
+    {
+        $usuario = Auth::user();
+
+        if (!$usuario->cliente) {
+            return view('consultas.consulta_general', [
+                'facturas' => [],
+                'mensaje' => 'No existe información de cliente asociada.'
+            ]);
+        }
+
+        $idCliente = $usuario->cliente->id_cliente;
+
+        // Obtener solo facturas eco del cliente
+        $facturas = Factura::obtenerEcoPorCliente($idCliente);
+
+        // Flujo alterno: sin compras previas
+        if ($facturas->isEmpty()) {
+            return view('consultas.consulta_general', [
+                'facturas' => [],
+                'mensaje' => 'No existen compras previas registradas.'
+            ]);
+        }
+
+        return view('consultas.consulta_general', [
+            'facturas' => $facturas,
+            'mensaje' => null
+        ]);
+    }
+    public function detallePopup($idFactura)
+    {
+        $usuario = Auth::user()->fresh(['cliente']);
+
+        if (!$usuario->cliente) {
+            abort(403);
+        }
+
+        $factura = Factura::with(['detalles.producto'])
+            ->where('id_factura', $idFactura)
+            ->where('id_cliente', $usuario->cliente->id_cliente)
+            ->firstOrFail();
+
+        return view('consultas.detalle_factura_modal', compact('factura'));
     }
 
 }
