@@ -60,25 +60,32 @@
                             {{ auth()->user()->usu_usuario }}
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            {{-- ✅ Historial de Compras --}}
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('facturas.historial') ? 'active fw-bold' : '' }}"
+                                   href="{{ route('facturas.historial') }}">
+                                    <i class="bi bi-receipt me-2"></i>
+                                    Historial de Compras
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            {{-- ✅ Cerrar sesión --}}
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item">
-                                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Cerrar sesión
                                     </button>
                                 </form>
                             </li>
                         </ul>
                     </li>
-                @else
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('login') ? 'fw-bold active text-white' : '' }}"
-                           href="{{ route('login') }}">
-                            <i class="bi bi-person-circle me-1"></i> Ingresar
-                        </a>
-                    </li>
                 @endauth
+
 
             </ul>
         </div>

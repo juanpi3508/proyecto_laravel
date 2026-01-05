@@ -34,4 +34,12 @@ class Factura extends Model
     {
         return $this->hasMany(ProxFac::class, 'id_factura', 'id_factura');
     }
+
+    public static function obtenerEcoPorCliente($idCliente)
+    {
+        return self::where('id_cliente', $idCliente)
+            ->where('fac_tipo', 'eco')
+            ->orderBy('fac_fecha_hora', 'desc')
+            ->get();
+    }
 }
