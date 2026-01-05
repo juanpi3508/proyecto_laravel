@@ -136,6 +136,53 @@
 
                 </div>
             </div>
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="mb-4 fw-bold product-section-title">Productos relacionados</h4>
+
+                    <div class="row row-cols-2 row-cols-md-4 g-3" id="relatedProductsContainer">
+
+                        @forelse($relacionados as $rel)
+                            @php
+                                $tokenRel = Crypt::encryptString($rel->id_producto);
+                                $imgRel = productImageUrl($rel->pro_imagen);
+                            @endphp
+
+                            <div class="col">
+                                <div class="card related-product h-100 shadow-sm">
+
+                                    <a href="{{ route('productos.show', $tokenRel) }}" class="text-decoration-none text-reset">
+                                        <img src="{{ $imgRel }}"
+                                             class="card-img-top"
+                                             alt="{{ $rel->pro_descripcion }}">
+                                    </a>
+
+                                    <div class="card-body">
+                                        <h6 class="card-title small mb-1 fw-semibold">
+                                            <a href="{{ route('productos.show', $tokenRel) }}"
+                                               class="text-reset text-decoration-none">
+                                                {{ $rel->pro_descripcion }}
+                                            </a>
+                                        </h6>
+
+                                        <p class="text-muted small mb-2">
+                                            {{ $rel->categoria->cat_descripcion ?? '' }}
+                                        </p>
+
+                                        <p class="fw-bold mb-0 product-price">
+                                            ${{ number_format($rel->pro_precio_venta, 2) }}
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-muted">No hay productos relacionados.</p>
+                        @endforelse
+
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 

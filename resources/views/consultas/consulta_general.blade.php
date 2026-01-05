@@ -30,19 +30,16 @@
                             <th>Factura</th>
                             <th>Fecha</th>
                             <th>Total</th>
-                            <th>Estado</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($facturas as $factura)
-                            <tr>
-                                <td class="fw-semibold">
-                                    <a href="#"
-                                       class="text-decoration-none text-primary"
-                                       data-id="{{ $factura->id_factura }}"
-                                       onclick="abrirDetalleFactura(this)">
-                                        {{ $factura->id_factura }}
-                                    </a>
+                            <tr class="cursor-pointer"
+                                data-id="{{ $factura->id_factura }}"
+                                onclick="abrirDetalleFactura(this)">
+
+                                <td class="fw-semibold text-primary">
+                                    {{ $factura->id_factura }}
                                 </td>
 
                                 <td>
@@ -51,12 +48,6 @@
 
                                 <td class="fw-bold text-success">
                                     ${{ number_format($factura->fac_total, 2) }}
-                                </td>
-
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        {{ $factura->estado_fac }}
-                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -72,9 +63,12 @@
     <div class="modal fade" id="detalleFacturaModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
+
                 <div class="modal-header">
                     <h5 class="modal-title">Detalle de Compra</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body" id="detalleFacturaContenido">
@@ -82,6 +76,7 @@
                         <div class="spinner-border text-primary"></div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -94,10 +89,10 @@
             const contenedor = document.getElementById('detalleFacturaContenido');
 
             contenedor.innerHTML = `
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-        </div>
-    `;
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+            </div>
+        `;
 
             fetch(`/factura/${idFactura}/popup`)
                 .then(response => response.text())
@@ -107,10 +102,10 @@
                 })
                 .catch(() => {
                     contenedor.innerHTML = `
-                <div class="alert alert-danger">
-                    No se pudo cargar el detalle de la factura.
-                </div>
-            `;
+                    <div class="alert alert-danger">
+                        No se pudo cargar el detalle de la factura.
+                    </div>
+                `;
                     modal.show();
                 });
         }
