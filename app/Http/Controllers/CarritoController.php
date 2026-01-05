@@ -9,11 +9,11 @@ class CarritoController extends Controller
 {
     public function index(Request $request)
     {
-        $carrito  = $this->getCarrito($request);
-        $items    = $this->hydrateProductos($carrito);
+        $carrito = $this->getCarrito($request);
+        $items = $this->hydrateProductos($carrito);
         $subtotal = $this->calcularSubtotal($items);
-        $iva      = 0.12;
-        $total    = $subtotal + ($subtotal * $iva);
+        $iva = 0.12;
+        $total = $subtotal + ($subtotal * $iva);
 
         return view('carrito.index', compact(
             'items',
@@ -29,11 +29,11 @@ class CarritoController extends Controller
 
         $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
-            'cantidad'    => 'required|integer|min:1'
+            'cantidad' => 'required|integer|min:1'
         ]);
 
         $producto = Product::findOrFail($request->id_producto);
-        $stock    = max(0, $producto->pro_saldo_fin ?? 0);
+        $stock = max(0, $producto->pro_saldo_fin ?? 0);
 
         if ($stock === 0) {
             return redirect()
@@ -42,7 +42,7 @@ class CarritoController extends Controller
         }
 
         $cantidad = min($request->cantidad, $stock);
-        $carrito  = $this->getCarrito($request);
+        $carrito = $this->getCarrito($request);
 
         if (isset($carrito[$producto->id_producto])) {
             $carrito[$producto->id_producto]['cantidad'] =
@@ -53,7 +53,7 @@ class CarritoController extends Controller
         } else {
             $carrito[$producto->id_producto] = [
                 'id_producto' => $producto->id_producto,
-                'cantidad'    => $cantidad
+                'cantidad' => $cantidad
             ];
         }
 
@@ -78,11 +78,10 @@ class CarritoController extends Controller
         ]);
 
         $producto = Product::findOrFail($idProducto);
-        $stock    = max(0, $producto->pro_saldo_fin ?? 0);
+        $stock = max(0, $producto->pro_saldo_fin ?? 0);
 
-        $cantidadSolicitada = (int) $request->cantidad;
+        $cantidadSolicitada = (int)$request->cantidad;
 
-        // Ajuste final permitido
         $cantidadFinal = min(
             max(1, $cantidadSolicitada),
             $stock
@@ -100,7 +99,7 @@ class CarritoController extends Controller
             return redirect()
                 ->route('carrito.index')
                 ->with('mensaje_stock',
-                    'La cantidad ingresada supera el stock disponible. Se ajustó al máximo permitido.'
+                    'No existe stock suficiente para aumentar la cantidad. Se ajustó al máximo permitido.'
                 );
         }
 
@@ -108,7 +107,7 @@ class CarritoController extends Controller
             return redirect()
                 ->route('carrito.index')
                 ->with('mensaje_stock',
-                    'La cantidad debe ser mayor a cero. Se ajustó automáticamente.'
+                    'La cantidad mínima permitida es 1. Se ajustó automáticamente.'
                 );
         }
 
@@ -133,10 +132,6 @@ class CarritoController extends Controller
         $request->session()->forget('carrito');
         return redirect()->route('carrito.index');
     }
-
-    /* =============================
-     * Métodos privados
-     * ============================= */
 
     private function getCarrito(Request $request): array
     {
