@@ -169,7 +169,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top:140px;">
+                <div class="card sticky-top" style="top:80px;">
                     <div class="card-body">
                         <h5 class="card-title mb-4">Resumen del Pedido</h5>
 
@@ -195,21 +195,14 @@
                             <span class="fw-bold fs-5">${{ number_format($total, 2) }}</span>
                         </div>
 
-                        @if(Auth::check())
-                            <form method="POST" action="{{ route('factura.generar') }}">
-                                @csrf
-                                <button class="btn btn-success w-100 py-3 fw-semibold"
-                                    @disabled($items->isEmpty())>
-                                    Proceder al Pago
-                                </button>
-                            </form>
-                        @else
+                        <form method="POST" action="{{ route('factura.generar') }}">
+                            @csrf
                             <button class="btn btn-success w-100 py-3 fw-semibold"
-                                    @disabled($items->isEmpty())
-                                    onclick="mostrarLoginModal()">
+                                @disabled($items->isEmpty())>
                                 Proceder al Pago
                             </button>
-                        @endif
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -217,81 +210,54 @@
         </div>
     </main>
 
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
-                </div>
-                <div class="modal-body text-center">
-                    <p class="mb-2">¿Estás seguro de eliminar este producto del carrito?</p>
-                    <p class="text-muted mb-0">Esta acción no se puede deshacer.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">
-                        Aceptar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @if(session('factura_confirmada'))
+        <div class="modal fade"
+             id="modalConfirmacion"
+             tabindex="-1"
+             data-bs-backdrop="static"
+             data-bs-keyboard="false">
 
-    <div class="modal fade"
-         id="loginModal"
-         tabindex="-1"
-         data-bs-backdrop="static"
-         data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Inicio de sesión requerido</h5>
-                </div>
-                <div class="modal-body text-center">
-                    <p class="mb-2">Para finalizar tu compra debes iniciar sesión.</p>
-                    <p class="text-muted mb-0">¿Deseas ir al login ahora?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="redirigirLogin()">
-                        Aceptar
-                    </button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pasarela de Pago</h5>
+                    </div>
+
+                    <div class="modal-body text-center">
+                        <p class="mb-2">Tu compra se realizó correctamente.</p>
+                        <p class="fw-bold">
+                            Factura Nº {{ session('id_factura') }}
+                        </p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <form method="POST"
+                              action="{{ route('factura.aprobar', session('id_factura')) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary">
+                                Aceptar
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <script>
-        let formAEliminar = null;
+        document.addEventListener('DOMContentLoaded', function () {
 
-        function confirmarEliminacion(btn) {
-            formAEliminar = btn.closest('form');
-            const modal = new bootstrap.Modal(
-                document.getElementById('confirmDeleteModal')
-            );
-            modal.show();
-        }
+            @if(session('factura_confirmada'))
+            const modalElement = document.getElementById('modalConfirmacion');
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+            @endif
 
-        document.getElementById('btnConfirmDelete')
-            .addEventListener('click', function () {
-                if (formAEliminar) {
-                    formAEliminar.submit();
-                }
-            });
-
-        function mostrarLoginModal() {
-            const modal = new bootstrap.Modal(
-                document.getElementById('loginModal')
-            );
-            modal.show();
-        }
-
-        function redirigirLogin() {
-            window.location.href = "{{ route('login') }}";
-        }
+        });
     </script>
+
 @endsection
