@@ -11,7 +11,7 @@ class ProxFac extends Model
     public $incrementing = false;
     public $timestamps = false;
 
-    protected $primaryKey = null; // clave compuesta (no soportada nativamente)
+    protected $primaryKey = null;
 
     protected $fillable = [
         'id_factura',
@@ -26,7 +26,6 @@ class ProxFac extends Model
     {
         return $this->belongsTo(Factura::class, 'id_factura', 'id_factura');
     }
-
 
     public function producto()
     {

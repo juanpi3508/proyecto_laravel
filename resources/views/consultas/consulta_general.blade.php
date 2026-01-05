@@ -4,17 +4,15 @@
 
 @section('content')
 
-    {{-- HEADER DE SECCIÓN --}}
     <header class="bg-light py-4 border-bottom mb-4">
         <div class="container">
             <h1 class="h3 mb-1">Historial de Compras</h1>
             <p class="text-muted mb-0">
-                Revisa todas las compras que has realizado en KoKo Market.
+                Consulta tus compras realizadas en KoKo Market.
             </p>
         </div>
     </header>
 
-    {{-- CONTENIDO --}}
     <main class="container mb-5">
 
         @if($mensaje)
@@ -31,8 +29,6 @@
                         <tr>
                             <th>Factura</th>
                             <th>Fecha</th>
-                            <th>Subtotal</th>
-                            <th>IVA</th>
                             <th>Total</th>
                             <th>Estado</th>
                         </tr>
@@ -41,20 +37,26 @@
                         @foreach($facturas as $factura)
                             <tr>
                                 <td class="fw-semibold">
-                                    {{ $factura->id_factura }}
+                                    <a href="#"
+                                       class="text-decoration-none text-primary"
+                                       data-id="{{ $factura->id_factura }}"
+                                       onclick="abrirDetalleFactura(this)">
+                                        {{ $factura->id_factura }}
+                                    </a>
                                 </td>
+
                                 <td>
                                     {{ \Carbon\Carbon::parse($factura->fac_fecha_hora)->format('d/m/Y H:i') }}
                                 </td>
-                                <td>${{ number_format($factura->fac_subtotal, 2) }}</td>
-                                <td>${{ number_format($factura->fac_iva, 2) }}</td>
+
                                 <td class="fw-bold text-success">
                                     ${{ number_format($factura->fac_total, 2) }}
                                 </td>
+
                                 <td>
-                                        <span class="badge bg-secondary">
-                                            {{ $factura->estado_fac }}
-                                        </span>
+                                    <span class="badge bg-secondary">
+                                        {{ $factura->estado_fac }}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -64,5 +66,54 @@
                 </div>
             </div>
         @endif
+
     </main>
+
+    <div class="modal fade" id="detalleFacturaModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle de Compra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body" id="detalleFacturaContenido">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function abrirDetalleFactura(elemento) {
+            const idFactura = elemento.dataset.id;
+            const modalElement = document.getElementById('detalleFacturaModal');
+            const modal = new bootstrap.Modal(modalElement);
+            const contenedor = document.getElementById('detalleFacturaContenido');
+
+            contenedor.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+        </div>
+    `;
+
+            fetch(`/factura/${idFactura}/popup`)
+                .then(response => response.text())
+                .then(html => {
+                    contenedor.innerHTML = html;
+                    modal.show();
+                })
+                .catch(() => {
+                    contenedor.innerHTML = `
+                <div class="alert alert-danger">
+                    No se pudo cargar el detalle de la factura.
+                </div>
+            `;
+                    modal.show();
+                });
+        }
+    </script>
+
 @endsection

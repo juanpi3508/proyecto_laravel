@@ -84,6 +84,13 @@
                             </li>
                         </ul>
                     </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('login') ? 'fw-bold active text-white' : '' }}"
+                           href="{{ route('login') }}">
+                            <i class="bi bi-person-circle me-1"></i> Ingresar
+                        </a>
+                    </li>
                 @endauth
 
 

@@ -52,7 +52,7 @@ class AuthController extends Controller
         $user->usu_ultimo_acceso = now();
         $user->save();
 
-        Auth::login($user);
+        Auth::login($user->load('cliente'));
         $request->session()->regenerate();
 
         // ✅ IMPORTANTE: vuelve al checkout si venía de ahí

@@ -155,7 +155,6 @@ class FacturaController extends Controller
     {
         $usuario = Auth::user();
 
-        // Seguridad: el usuario debe tener cliente asociado
         if (!$usuario->cliente) {
             return view('consultas.consulta_general', [
                 'facturas' => [],
@@ -181,4 +180,20 @@ class FacturaController extends Controller
             'mensaje' => null
         ]);
     }
+    public function detallePopup($idFactura)
+    {
+        $usuario = Auth::user()->fresh(['cliente']);
+
+        if (!$usuario->cliente) {
+            abort(403);
+        }
+
+        $factura = Factura::with(['detalles.producto'])
+            ->where('id_factura', $idFactura)
+            ->where('id_cliente', $usuario->cliente->id_cliente)
+            ->firstOrFail();
+
+        return view('consultas.detalle_factura_modal', compact('factura'));
+    }
+
 }
