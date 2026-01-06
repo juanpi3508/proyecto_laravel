@@ -42,17 +42,20 @@ class CarritoController extends Controller
             );
         }
 
-        $cantidadSolicitada = (int) $request->cantidad;
+        $cantidad = min($request->cantidad, $stock);
         $carrito = $this->getCarrito($request);
 
-        $cantidadEnCarrito = $carrito[$producto->id_producto]['cantidad'] ?? 0;
-        $cantidadTotal = $cantidadEnCarrito + $cantidadSolicitada;
-
-        if ($cantidadTotal > $stock) {
-            return back()->with(
-                'mensaje_stock',
-                "Stock insuficiente. Disponible: {$stock}. En carrito: {$cantidadEnCarrito}."
-            );
+        if (isset($carrito[$producto->id_producto])) {
+            $carrito[$producto->id_producto]['cantidad'] =
+                min(
+                    $carrito[$producto->id_producto]['cantidad'] + $cantidad,
+                    $stock
+                );
+        } else {
+            $carrito[$producto->id_producto] = [
+                'id_producto' => $producto->id_producto,
+                'cantidad' => $cantidad
+            ];
         }
 
         // Agregar / actualizar producto

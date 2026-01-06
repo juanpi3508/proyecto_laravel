@@ -195,28 +195,5 @@ class FacturaController extends Controller
 
         return view('consultas.detalle_factura_modal', compact('factura'));
     }
-    public function productosMasVendidos()
-    {
-        return DB::table('proxfac as pxf')
-            ->join('productos as p', 'p.id_producto', '=', 'pxf.id_producto')
-            ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
-            ->select(
-                'p.id_producto',
-                'p.pro_descripcion',
-                'p.pro_precio_venta',
-                'p.pro_imagen',
-                DB::raw('SUM(pxf.pxf_cantidad) as total_vendido')
-            )
-            ->where('f.estado_fac', 'APR')
-            ->where('pxf.estado_pxf', 'APR')
-            ->groupBy(
-                'p.id_producto',
-                'p.pro_descripcion',
-                'p.pro_precio_venta',
-                'p.pro_imagen'
-            )
-            ->orderByDesc('total_vendido')
-            ->limit(6)
-            ->get();
-    }
+
 }
