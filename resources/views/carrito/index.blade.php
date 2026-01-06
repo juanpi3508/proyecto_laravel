@@ -161,8 +161,10 @@
                     <form method="POST" action="{{ route('carrito.clear') }}">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-outline-danger">
-                            <i class="bi bi-trash me-2"></i>
+                        <button type="button"
+                                class="btn btn-outline-danger w-100 w-md-auto"
+                                onclick="confirmarVaciado(this)">
+                        <i class="bi bi-trash me-2"></i>
                             Vaciar Carrito de Compras
                         </button>
                     </form>
@@ -268,8 +270,30 @@
         </div>
     </div>
 
+    <div class="modal fade" id="confirmClearModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vaciar carrito</h5>
+                </div>
+                <div class="modal-body text-center">
+                    ¿Estás seguro de vaciar todo el carrito de compras?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="btnConfirmClear">
+                        Vaciar carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let formAEliminar = null;
+        let formAVaciar = null;
 
         function confirmarEliminacion(btn) {
             formAEliminar = btn.closest('form');
@@ -278,10 +302,24 @@
             ).show();
         }
 
+        function confirmarVaciado(btn) {
+            formAVaciar = btn.closest('form');
+            new bootstrap.Modal(
+                document.getElementById('confirmClearModal')
+            ).show();
+        }
+
         document.getElementById('btnConfirmDelete')
             .addEventListener('click', function () {
                 if (formAEliminar) {
                     formAEliminar.submit();
+                }
+            });
+
+        document.getElementById('btnConfirmClear')
+            .addEventListener('click', function () {
+                if (formAVaciar) {
+                    formAVaciar.submit();
                 }
             });
 
