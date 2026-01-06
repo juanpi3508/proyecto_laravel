@@ -83,7 +83,7 @@
                                         <a href="{{ route('productos.show', $token) }}"
                                            class="d-flex align-items-center text-decoration-none text-dark">
 
-                                            <img src="{{ asset($item->imagen) }}"
+                                            <img src="{{ Storage::url($item->imagen) }}"
                                                  class="rounded me-3"
                                                  style="width:60px;height:60px;object-fit:cover;"
                                                  alt="{{ $item->descripcion }}">
