@@ -32,24 +32,7 @@ class Factura extends Model
 
     public function detalles()
     {
-        return $this->hasMany(ProxFac::class, 'id_factura', 'id_factura')
-            ->where('estado_pxf', 'APR');
-    }
-
-    public static function obtenerEcoPorCliente($idCliente)
-    {
-        return self::where('id_cliente', $idCliente)
-            ->where('fac_tipo', 'ECO')
-            ->orderBy('fac_fecha_hora', 'desc')
-            ->get();
-    }
-
-    public static function obtenerEcoPorCliente($idCliente)
-    {
-        return self::where('id_cliente', $idCliente)
-            ->where('fac_tipo', 'ECO')
-            ->orderBy('fac_fecha_hora', 'desc')
-            ->get();
+        return $this->hasMany(ProxFac::class, 'id_factura', 'id_factura');
     }
 
     public static function obtenerEcoPorCliente($idCliente)
