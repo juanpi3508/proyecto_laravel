@@ -36,40 +36,42 @@ class CarritoController extends Controller
         $stock = max(0, $producto->pro_saldo_fin ?? 0);
 
         if ($stock === 0) {
-            return redirect()
-                ->back()
-                ->with('error', 'Producto sin stock disponible');
+            return back()->with(
+                'mensaje_stock',
+                'Este producto se encuentra agotado.'
+            );
         }
 
-        $cantidad = min($request->cantidad, $stock);
+        $cantidadSolicitada = (int) $request->cantidad;
         $carrito = $this->getCarrito($request);
 
-        if (isset($carrito[$producto->id_producto])) {
-            $carrito[$producto->id_producto]['cantidad'] =
-                min(
-                    $carrito[$producto->id_producto]['cantidad'] + $cantidad,
-                    $stock
-                );
-        } else {
-            $carrito[$producto->id_producto] = [
-                'id_producto' => $producto->id_producto,
-                'cantidad' => $cantidad
-            ];
+        $cantidadEnCarrito = $carrito[$producto->id_producto]['cantidad'] ?? 0;
+        $cantidadTotal = $cantidadEnCarrito + $cantidadSolicitada;
+
+        if ($cantidadTotal > $stock) {
+            return back()->with(
+                'mensaje_stock',
+                "Stock insuficiente. Disponible: {$stock}. En carrito: {$cantidadEnCarrito}."
+            );
         }
+
+        // Agregar / actualizar producto
+        $carrito[$producto->id_producto] = [
+            'id_producto' => $producto->id_producto,
+            'cantidad' => $cantidadTotal
+        ];
 
         $this->saveCarrito($request, $carrito);
 
         if ($redirect) {
             return redirect()
                 ->route('carrito.index')
-                ->with('success', 'Producto agregado al carrito');
+                ->with('success', 'Producto agregado al carrito.');
         }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Producto agregado');
-
+        return back()->with('success', 'Producto agregado correctamente.');
     }
+
 
     public function update(Request $request, string $idProducto)
     {

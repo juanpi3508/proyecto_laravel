@@ -22,10 +22,27 @@
     $precio = $producto->pro_precio_venta ?? 0;
     $precioAnterior = $precio > 0 ? $precio / 0.85 : 0;
     $categoriaNombre = $producto->categoria->cat_descripcion ?? 'Sin categoría';
-    $stock = $producto->pro_saldo_fin ?? 0;
+    $stock = max(0, $producto->pro_saldo_fin ?? 0);
 @endphp
 
 @section('content')
+
+    {{-- MENSAJES --}}
+    @if(session('mensaje_stock'))
+        <div class="container mt-3">
+            <div class="alert alert-warning">
+                <strong>⚠ Atención:</strong> {{ session('mensaje_stock') }}
+            </div>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="container mt-3">
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
 
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -54,7 +71,7 @@
     <main class="container my-4">
         <div class="row">
 
-            <!-- IMÁGENES -->
+            {{-- IMÁGENES --}}
             <div class="col-md-5 mb-4">
                 <img src="{{ $img }}" class="product-image-main mb-3" alt="{{ $producto->pro_descripcion }}">
                 <div class="d-flex gap-2">
@@ -64,7 +81,7 @@
                 </div>
             </div>
 
-            <!-- INFO -->
+            {{-- INFO --}}
             <div class="col-md-4 mb-4">
                 <h1 class="h3 fw-bold">{{ $producto->pro_descripcion }}</h1>
 
@@ -93,7 +110,7 @@
                 </div>
             </div>
 
-            <!-- COMPRA -->
+            {{-- COMPRA --}}
             <div class="col-md-3">
                 <div class="sticky-top" style="top:80px">
 
@@ -108,15 +125,16 @@
 
                         <label class="form-label small fw-semibold">Cantidad</label>
                         <select name="cantidad"
-                                id="quantity"
                                 class="form-select mb-3"
                             {{ $stock <= 0 ? 'disabled' : '' }}>
                             @foreach([1,2,3,4,5,10] as $cant)
-                                <option value="{{ $cant }}">{{ $cant }}</option>
+                                @if($cant <= $stock)
+                                    <option value="{{ $cant }}">{{ $cant }}</option>
+                                @endif
                             @endforeach
                         </select>
 
-                        <!-- AGREGAR -->
+                        {{-- AGREGAR --}}
                         <button type="submit"
                                 class="btn btn-add-cart w-100 mb-2"
                             {{ $stock <= 0 ? 'disabled' : '' }}>
@@ -124,7 +142,7 @@
                             Agregar al carrito
                         </button>
 
-                        <!-- COMPRAR AHORA -->
+                        {{-- COMPRAR AHORA --}}
                         <button type="button"
                                 class="btn btn-buy-now w-100"
                                 onclick="comprarAhora()"
@@ -136,11 +154,13 @@
 
                 </div>
             </div>
+
+            {{-- RELACIONADOS --}}
             <div class="row mt-5">
                 <div class="col-12">
                     <h4 class="mb-4 fw-bold product-section-title">Productos relacionados</h4>
 
-                    <div class="row row-cols-2 row-cols-md-4 g-3" id="relatedProductsContainer">
+                    <div class="row row-cols-2 row-cols-md-4 g-3">
 
                         @forelse($relacionados as $rel)
                             @php
@@ -150,17 +170,15 @@
 
                             <div class="col">
                                 <div class="card related-product h-100 shadow-sm">
-
-                                    <a href="{{ route('productos.show', $tokenRel) }}" class="text-decoration-none text-reset">
-                                        <img src="{{ $imgRel }}"
-                                             class="card-img-top"
-                                             alt="{{ $rel->pro_descripcion }}">
+                                    <a href="{{ route('productos.show', $tokenRel) }}"
+                                       class="text-decoration-none text-reset">
+                                        <img src="{{ $imgRel }}" class="card-img-top">
                                     </a>
 
                                     <div class="card-body">
-                                        <h6 class="card-title small mb-1 fw-semibold">
+                                        <h6 class="small fw-semibold mb-1">
                                             <a href="{{ route('productos.show', $tokenRel) }}"
-                                               class="text-reset text-decoration-none">
+                                               class="text-decoration-none text-reset">
                                                 {{ $rel->pro_descripcion }}
                                             </a>
                                         </h6>
@@ -170,10 +188,9 @@
                                         </p>
 
                                         <p class="fw-bold mb-0 product-price">
-                                            ${{ number_format($rel->pro_precio_venta, 2) }}
+                                            ${{ number_format($rel->pro_precio_venta,2) }}
                                         </p>
                                     </div>
-
                                 </div>
                             </div>
                         @empty
@@ -183,6 +200,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 
