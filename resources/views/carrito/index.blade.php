@@ -171,7 +171,7 @@
 
             <div class="col-lg-4">
                 <div class="card">
-                <div class="card-body">
+                    <div class="card-body">
                         <h5 class="card-title mb-4">Resumen del Pedido</h5>
 
                         <div class="d-flex justify-content-between mb-3">
@@ -247,17 +247,51 @@
         </div>
     @endif
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body text-center">
+                    ¿Estás seguro de eliminar este producto del carrito?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="btnConfirmDelete">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        let formAEliminar = null;
+
+        function confirmarEliminacion(btn) {
+            formAEliminar = btn.closest('form');
+            new bootstrap.Modal(
+                document.getElementById('confirmDeleteModal')
+            ).show();
+        }
+
+        document.getElementById('btnConfirmDelete')
+            .addEventListener('click', function () {
+                if (formAEliminar) {
+                    formAEliminar.submit();
+                }
+            });
+
+        document.addEventListener('DOMContentLoaded', function () {
             @if(session('factura_confirmada'))
             const modalElement = document.getElementById('modalConfirmacion');
             if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
+                new bootstrap.Modal(modalElement).show();
             }
             @endif
-
         });
     </script>
 
