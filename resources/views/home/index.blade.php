@@ -1,7 +1,3 @@
-@php
-    use Illuminate\Support\Facades\Crypt;
-@endphp
-
 @extends('layouts.app')
 
 @section('title', 'KoKo Market | Inicio - Tu Súper de Barrio')
@@ -107,7 +103,7 @@
 
                                 <img
                                     src="{{ $producto->pro_imagen
-                            ? asset($producto->pro_imagen)
+                            ? Storage::url($producto->pro_imagen)
                             : 'https://via.placeholder.com/300x300?text=Producto' }}"
                                     class="card-img-top mx-auto"
                                     alt="{{ $producto->pro_descripcion }}"
@@ -142,6 +138,7 @@
             </div>
 
 
+
             <div class="text-center mt-4">
                 <a href="{{ route('catalogo.index') }}" class="product-link fw-bold">
                     Ver todos los productos →
@@ -159,7 +156,7 @@
                 <div class="col-lg-5">
                     <div class="img-wrapper" style="height: 450px; overflow: hidden;">
                         <img
-                            src="https://media.istockphoto.com/id/1223013236/es/foto/vendedor-de-frutas-en-el-mercado-de-otavalo-ecuador.jpg"
+                            src="https://media.istockphoto.com/id/1223013236/es/foto/vendedor-de-frutas-en-el-mercado-de-otavalo-ecuador.jpg?s=612x612&w=0&k=20&c=bP72WZXp12pOvZUXFF2dGzhZ8VFOGuZP9pJU8VlvNaM="
                             alt="Mercado tradicional de Quito"
                             style="width:100%; height:100%; object-fit:cover;"
                             loading="lazy"
