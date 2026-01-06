@@ -7,7 +7,8 @@
 @endphp
 
 @section('content')
-    <main class="container my-5">
+    <main class="container pt-5 mt-5 mb-5">
+
         <div class="row">
 
             <div class="col-lg-8 mb-4">
@@ -169,8 +170,8 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top:80px;">
-                    <div class="card-body">
+                <div class="card">
+                <div class="card-body">
                         <h5 class="card-title mb-4">Resumen del Pedido</h5>
 
                         <div class="d-flex justify-content-between mb-3">
