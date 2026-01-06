@@ -7,36 +7,34 @@
 @endphp
 
 @section('content')
-    <main class="container my-5">
+    <main class="container pt-5 mt-5 mb-5">
+
         <div class="row">
 
-            {{-- IZQUIERDA --}}
             <div class="col-lg-8 mb-4">
                 <h2 class="mb-4">Carrito de Compras</h2>
 
                 @if(session('warning'))
-                    <div class="mb-3">
-                        <strong>⚠ Atención:</strong>
-                        {{ session('warning') }}
+                    <div class="alert alert-warning mb-3">
+                        <strong>⚠ Atención:</strong> {{ session('warning') }}
                     </div>
                 @endif
 
                 @if(session('success'))
-                    <div class="mb-3">
+                    <div class="alert alert-success mb-3">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-3">
+                    <div class="alert alert-danger mb-3">
                         {{ session('error') }}
                     </div>
                 @endif
 
                 @if(session('mensaje_stock'))
-                    <div class="mb-3">
-                        <strong>⚠ Atención:</strong>
-                        {{ session('mensaje_stock') }}
+                    <div class="alert alert-danger mb-3">
+                        <strong>⚠ Error de stock:</strong> {{ session('mensaje_stock') }}
                     </div>
                 @endif
 
@@ -69,12 +67,15 @@
                                 <div class="row align-items-center text-center">
 
                                     <div class="col-5 d-flex align-items-center text-start">
+
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
                                               class="me-2">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-link text-danger p-0">
+                                            <button type="button"
+                                                    class="btn btn-link text-danger p-0"
+                                                    onclick="confirmarEliminacion(this)">
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                         </form>
@@ -103,8 +104,7 @@
                                     <div class="col-3">
                                         <div class="d-flex justify-content-center align-items-center gap-1">
 
-                                            <form method="POST"
-                                                  action="{{ route('carrito.update', $item->id_producto) }}">
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="cantidad" value="{{ $item->cantidad - 1 }}">
@@ -115,8 +115,7 @@
                                                 </button>
                                             </form>
 
-                                            <form method="POST"
-                                                  action="{{ route('carrito.update', $item->id_producto) }}">
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="number"
@@ -124,14 +123,17 @@
                                                        value="{{ $item->cantidad }}"
                                                        min="1"
                                                        max="{{ $item->stock }}"
+                                                       step="1"
+                                                       inputmode="numeric"
+                                                       pattern="[0-9]*"
+                                                       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
                                                        class="form-control form-control-sm text-center"
                                                        style="width:70px;"
-                                                       onblur="if(this.value != this.defaultValue) this.form.submit()"
-                                                       onkeydown="if(event.key === 'Enter'){ event.preventDefault(); if(this.value != this.defaultValue) this.form.submit(); }">
+                                                       onblur="if(this.value==''||this.value<1)this.value=1;if(this.value!=this.defaultValue)this.form.submit()"
+                                                       onkeydown="if(event.key==='Enter'){event.preventDefault();if(this.value!=this.defaultValue)this.form.submit();}">
                                             </form>
 
-                                            <form method="POST"
-                                                  action="{{ route('carrito.update', $item->id_producto) }}">
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="cantidad" value="{{ $item->cantidad + 1 }}">
@@ -167,9 +169,8 @@
                 </div>
             </div>
 
-            {{-- DERECHA --}}
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top:80px;">
+                <div class="card">
                     <div class="card-body">
                         <h5 class="card-title mb-4">Resumen del Pedido</h5>
 
@@ -244,14 +245,54 @@
                 </div>
             </div>
         </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                new bootstrap.Modal(
-                    document.getElementById('modalConfirmacion')
-                ).show();
-            });
-        </script>
     @endif
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body text-center">
+                    ¿Estás seguro de eliminar este producto del carrito?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="btnConfirmDelete">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let formAEliminar = null;
+
+        function confirmarEliminacion(btn) {
+            formAEliminar = btn.closest('form');
+            new bootstrap.Modal(
+                document.getElementById('confirmDeleteModal')
+            ).show();
+        }
+
+        document.getElementById('btnConfirmDelete')
+            .addEventListener('click', function () {
+                if (formAEliminar) {
+                    formAEliminar.submit();
+                }
+            });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            @if(session('factura_confirmada'))
+            const modalElement = document.getElementById('modalConfirmacion');
+            if (modalElement) {
+                new bootstrap.Modal(modalElement).show();
+            }
+            @endif
+        });
+    </script>
 
 @endsection

@@ -43,4 +43,12 @@ class Factura extends Model
             ->orderBy('fac_fecha_hora', 'desc')
             ->get();
     }
+
+    public static function obtenerEcoPorCliente($idCliente)
+    {
+        return self::where('id_cliente', $idCliente)
+            ->where('fac_tipo', 'ECO')
+            ->orderBy('fac_fecha_hora', 'desc')
+            ->get();
+    }
 }

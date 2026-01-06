@@ -6,9 +6,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\FacturaController;
 
-Route::get('/', function () {
-    return view('home.index');
+Route::get('/', function (FacturaController $facturaController) {
+
+    $masVendidos = $facturaController->productosMasVendidos();
+
+    return view('home.index', compact('masVendidos'));
+
 })->name('home');
+
 
 Route::get('/catalogo', [ProductController::class, 'catalogo'])
     ->name('catalogo.index');

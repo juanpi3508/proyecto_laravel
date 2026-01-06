@@ -150,4 +150,15 @@
         }
     </script>
 
+    <script>
+        function comprarAhora() {
+            const form = document.getElementById('formAgregarCarrito');
+            form.submit();
+
+            setTimeout(() => {
+                window.location.href = "{{ route('carrito.index') }}";
+            }, 300);
+        }
+    </script>
+
 @endsection

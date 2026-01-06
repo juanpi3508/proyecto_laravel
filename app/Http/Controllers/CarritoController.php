@@ -36,9 +36,10 @@ class CarritoController extends Controller
         $stock = max(0, $producto->pro_saldo_fin ?? 0);
 
         if ($stock === 0) {
-            return redirect()
-                ->back()
-                ->with('error', 'Producto sin stock disponible');
+            return back()->with(
+                'mensaje_stock',
+                'Este producto se encuentra agotado.'
+            );
         }
 
         $cantidad = min($request->cantidad, $stock);
@@ -57,19 +58,23 @@ class CarritoController extends Controller
             ];
         }
 
+        // Agregar / actualizar producto
+        $carrito[$producto->id_producto] = [
+            'id_producto' => $producto->id_producto,
+            'cantidad' => $cantidadTotal
+        ];
+
         $this->saveCarrito($request, $carrito);
 
         if ($redirect) {
             return redirect()
                 ->route('carrito.index')
-                ->with('success', 'Producto agregado al carrito');
+                ->with('success', 'Producto agregado al carrito.');
         }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Producto agregado');
-
+        return back()->with('success', 'Producto agregado correctamente.');
     }
+
 
     public function update(Request $request, string $idProducto)
     {

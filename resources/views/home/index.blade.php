@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Crypt;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'KoKo Market | Inicio - Tu Súper de Barrio')
@@ -86,9 +90,57 @@
                 <p class="text-muted">Los favoritos de nuestros clientes</p>
             </div>
 
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3" id="mas-vendidos">
-                {{-- Se carga dinámicamente con JS --}}
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 justify-content-center text-center">
+
+                @forelse($masVendidos as $producto)
+                    @php
+                        // Generar token cifrado como espera ProductController@show
+                        $token = Crypt::encryptString($producto->id_producto);
+                    @endphp
+
+                    <div class="col d-flex justify-content-center">
+
+                        <a href="{{ route('productos.show', $token) }}"
+                           class="text-decoration-none text-dark w-100">
+
+                            <div class="card h-100 product-card shadow-sm">
+
+                                <img
+                                    src="{{ $producto->pro_imagen
+                            ? asset($producto->pro_imagen)
+                            : 'https://via.placeholder.com/300x300?text=Producto' }}"
+                                    class="card-img-top mx-auto"
+                                    alt="{{ $producto->pro_descripcion }}"
+                                    loading="lazy"
+                                >
+
+                                <div class="card-body">
+                                    <h6 class="card-title mb-1">
+                                        {{ $producto->pro_descripcion }}
+                                    </h6>
+
+                                    <p class="fw-bold mb-1">
+                                        ${{ number_format($producto->pro_precio_venta, 2) }}
+                                    </p>
+
+                                    <small class="text-muted">
+                                        Vendidos: {{ $producto->total_vendido }}
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+                @empty
+                    <div class="col-12 text-muted text-center">
+                        Aún no existen productos vendidos.
+                    </div>
+                @endforelse
+
             </div>
+
 
             <div class="text-center mt-4">
                 <a href="{{ route('catalogo.index') }}" class="product-link fw-bold">
