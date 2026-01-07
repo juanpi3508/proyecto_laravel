@@ -74,11 +74,6 @@
             {{-- IMÁGENES --}}
             <div class="col-md-5 mb-4">
                 <img src="{{ $img }}" class="product-image-main mb-3" alt="{{ $producto->pro_descripcion }}">
-                <div class="d-flex gap-2">
-                    @for($i=0;$i<4;$i++)
-                        <img src="{{ $img }}" class="product-thumbnail {{ $i==0?'active':'' }}">
-                    @endfor
-                </div>
             </div>
 
             {{-- INFO --}}
