@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class Product extends Model
 {
@@ -191,10 +192,55 @@ class Product extends Model
         )
             ->join('proxfac as pxf', 'productos.id_producto', '=', 'pxf.id_producto')
             ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
+            ->where('productos.estado_prod', 'ACT')
             ->where('f.estado_fac', 'APR')
             ->where('pxf.estado_pxf', 'APR')
             ->groupBy('productos.id_producto')
             ->orderByDesc('total_vendido')
+            ->limit($limit)
+            ->get();
+    }
+    public function scopePublico($query)
+    {
+        return $query->with('categoria')->activos();
+    }
+
+    /**
+     * Catalogo completo aplicando scopes existentes.
+     */
+    public static function catalogo(?string $q, ?string $cat, string $sort = 'relevance')
+    {
+        return static::publico()
+            ->buscar($q)
+            ->filtrarCategoria($cat)
+            ->ordenar($sort)
+            ->get();
+    }
+
+    /**
+     * Buscar un producto "publico" por token.
+     */
+    public static function findByTokenOrFail(string $token): self
+    {
+        try {
+            $id = Crypt::decryptString($token);
+        } catch (DecryptException $e) {
+            abort(404);
+        }
+
+        return static::publico()
+            ->whereKey((string) $id) // usa primaryKey definido: id_producto
+            ->firstOrFail();
+    }
+
+    /**
+     * Productos relacionados por categoria (excluye el actual).
+     */
+    public static function relacionados(self $producto, int $limit = 4)
+    {
+        return static::publico()
+            ->where('id_categoria', $producto->id_categoria)
+            ->whereKeyNot($producto->getKey())
             ->limit($limit)
             ->get();
     }
