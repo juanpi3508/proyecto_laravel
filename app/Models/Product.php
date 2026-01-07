@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -144,4 +145,20 @@ class Product extends Model
     }
 
 
+
+    public static function masVendidos($limit = 6)
+    {
+        return self::select(
+            'productos.*',
+            DB::raw('SUM(pxf.pxf_cantidad) as total_vendido')
+        )
+            ->join('proxfac as pxf', 'productos.id_producto', '=', 'pxf.id_producto')
+            ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
+            ->where('f.estado_fac', 'APR')
+            ->where('pxf.estado_pxf', 'APR')
+            ->groupBy('productos.id_producto')
+            ->orderByDesc('total_vendido')
+            ->limit($limit)
+            ->get();
+    }
 }
