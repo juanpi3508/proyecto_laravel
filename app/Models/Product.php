@@ -58,6 +58,7 @@ class Product extends Model
     }
 
 
+
     public function getImageUrlAttribute(): string
     {
         if (!$this->pro_imagen) {
@@ -121,6 +122,11 @@ class Product extends Model
     public function estaAgotado(): bool
     {
         return $this->stockDisponible() === 0;
+    }
+
+    public function puedeComprar(int $cantidadSolicitada, int $cantidadEnCarrito = 0): bool
+    {
+        return ($cantidadSolicitada + $cantidadEnCarrito) <= $this->stockDisponible();
     }
 
 

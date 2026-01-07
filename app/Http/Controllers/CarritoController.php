@@ -25,9 +25,6 @@ class CarritoController extends Controller
         ]);
     }
 
-    /* ==============================
-     |  AGREGAR PRODUCTO
-     ==============================*/
     public function store(Request $request)
     {
         $request->validate([
@@ -46,14 +43,10 @@ class CarritoController extends Controller
 
         $carrito = $this->construirCarritoDesdeSesion($request);
 
-        $cantidad = $producto->normalizarCantidad(
-            $request->cantidad + $this->cantidadEnCarrito(
-                $carrito,
-                $producto->id_producto
-            )
-        );
+        $cantidadActual = $this->cantidadEnCarrito($carrito, $producto->id_producto);
+        $total = $cantidadActual + $request->cantidad;
 
-        if ($cantidad < $request->cantidad) {
+        if ($total > $producto->stockDisponible()) {
             return back()->with(
                 'mensaje_stock',
                 "Stock insuficiente. Disponible: {$producto->stockDisponible()}."
@@ -62,7 +55,7 @@ class CarritoController extends Controller
 
         $detalle = new DetalleCarrito(
             $producto->id_producto,
-            $cantidad,
+            $request->cantidad,
             $producto->precioVenta(),
             $producto->stockDisponible(),
             $producto->pro_descripcion,
@@ -78,9 +71,8 @@ class CarritoController extends Controller
             : back()->with('success', 'Producto agregado correctamente.');
     }
 
-    /* ==============================
-     |  ACTUALIZAR CANTIDAD
-     ==============================*/
+
+
     public function update(Request $request, string $idProducto)
     {
         $request->validate([
@@ -113,9 +105,7 @@ class CarritoController extends Controller
         return redirect()->route('carrito.index');
     }
 
-    /* ==============================
-     |  ELIMINAR PRODUCTO
-     ==============================*/
+
     public function destroy(Request $request, string $idProducto)
     {
         $carrito = $this->construirCarritoDesdeSesion($request);
@@ -126,18 +116,13 @@ class CarritoController extends Controller
         return redirect()->route('carrito.index');
     }
 
-    /* ==============================
-     |  VACIAR CARRITO
-     ==============================*/
+
     public function clear(Request $request)
     {
         $request->session()->forget('carrito');
         return redirect()->route('carrito.index');
     }
 
-    /* ==============================
-     |  MÉTODOS PRIVADOS
-     ==============================*/
 
     private function construirCarritoDesdeSesion(Request $request): Carrito
     {
