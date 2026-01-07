@@ -77,10 +77,10 @@
 
                             <!-- IMAGEN -->
                             <img src="{{ $p->image_url }}"
-                                 class="card-img-top"
-                                 style="height:220px; object-fit:cover"
+                                 class="card-img-top catalog-product-img"
                                  alt="{{ $p->pro_descripcion }}"
                                  loading="lazy">
+
 
                             <div class="card-body d-flex flex-column">
 
