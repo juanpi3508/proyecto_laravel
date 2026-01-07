@@ -11,17 +11,24 @@ class CarritoController extends Controller
     {
         $carrito = $this->getCarrito($request);
         $items = $this->hydrateProductos($carrito);
+
         $subtotal = $this->calcularSubtotal($items);
-        $iva = 0.12;
-        $total = $subtotal + ($subtotal * $iva);
+        $iva = 0.15;
+        $impuestos = $subtotal * $iva;
+        $total = $subtotal + $impuestos;
+
+        $articulos = $items->sum('cantidad');
 
         return view('carrito.index', compact(
             'items',
             'subtotal',
             'iva',
-            'total'
+            'impuestos',
+            'total',
+            'articulos'
         ));
     }
+
 
     public function store(Request $request)
     {

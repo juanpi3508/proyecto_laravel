@@ -39,7 +39,7 @@
                 @endif
 
                 <div class="card mb-3 d-none d-md-block" style="background-color:#f6e6a5;">
-                <div class="card-body py-2">
+                    <div class="card-body py-2">
                         <div class="row text-center fw-bold">
                             <div class="col-5">Producto</div>
                             <div class="col-2">Precio</div>
@@ -66,7 +66,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center text-center d-none d-md-flex">
 
-                                <div class="col-5 d-flex align-items-center text-start">
+                                    <div class="col-5 d-flex align-items-center text-start">
 
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
@@ -231,7 +231,7 @@
                         <button type="button"
                                 class="btn btn-outline-danger w-100 w-md-auto"
                                 onclick="confirmarVaciado(this)">
-                        <i class="bi bi-trash me-2"></i>
+                            <i class="bi bi-trash me-2"></i>
                             Vaciar Carrito de Compras
                         </button>
                     </form>
@@ -245,7 +245,7 @@
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Artículos</span>
-                            <span class="fw-semibold">{{ $items->sum('cantidad') }}</span>
+                            <span class="fw-semibold">{{ $articulos }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-3">
@@ -254,8 +254,8 @@
                         </div>
 
                         <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">Impuestos (12%)</span>
-                            <span class="fw-semibold">${{ number_format($subtotal * 0.12, 2) }}</span>
+                            <span class="text-muted">Impuestos (15%)</span>
+                            <span class="fw-semibold">${{ number_format($impuestos, 2) }}</span>
                         </div>
 
                         <hr>
@@ -283,7 +283,6 @@
                                 Proceder al Pago
                             </button>
                         @endguest
-
                     </div>
                 </div>
             </div>
@@ -291,164 +290,11 @@
         </div>
     </main>
 
-    @if(session('factura_confirmada'))
-        <div class="modal fade"
-             id="modalConfirmacion"
-             tabindex="-1"
-             data-bs-backdrop="static"
-             data-bs-keyboard="false">
+    @include('carrito.modals')
 
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
+    @push('scripts')
+        <script src="{{ asset('/assets/js/carrito.js') }}"></script>
+    @endpush
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">Pasarela de Pago</h5>
-                    </div>
-
-                    <div class="modal-body text-center">
-                        <p class="mb-2">Tu compra se realizó correctamente.</p>
-                        <p class="fw-bold">
-                            Factura Nº {{ session('id_factura') }}
-                        </p>
-                    </div>
-
-                    <div class="modal-footer">
-                        <form method="POST"
-                              action="{{ route('factura.aprobar', session('id_factura')) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-secondary">
-                                Aceptar
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
-                </div>
-                <div class="modal-body text-center">
-                    ¿Estás seguro de eliminar este producto del carrito?
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button class="btn btn-danger" id="btnConfirmDelete">
-                        Eliminar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="confirmClearModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Vaciar carrito</h5>
-                </div>
-                <div class="modal-body text-center">
-                    ¿Estás seguro de vaciar todo el carrito de compras?
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button class="btn btn-danger" id="btnConfirmClear">
-                        Vaciar carrito
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade"
-         id="loginRequiredModal"
-         tabindex="-1"
-         data-bs-backdrop="static"
-         data-bs-keyboard="false">
-
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Inicio de sesión requerido</h5>
-                </div>
-
-                <div class="modal-body text-center">
-                    <p class="mb-0">
-                        Para finalizar tu compra necesitas iniciar sesión.
-                    </p>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary"
-                            data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-
-                    <a href="{{ route('login') }}"
-                       class="btn btn-primary">
-                        Ir a iniciar sesión
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let formAEliminar = null;
-        let formAVaciar = null;
-
-        function confirmarEliminacion(btn) {
-            formAEliminar = btn.closest('form');
-            new bootstrap.Modal(
-                document.getElementById('confirmDeleteModal')
-            ).show();
-        }
-
-        function confirmarVaciado(btn) {
-            formAVaciar = btn.closest('form');
-            new bootstrap.Modal(
-                document.getElementById('confirmClearModal')
-            ).show();
-        }
-
-        document.getElementById('btnConfirmDelete')
-            .addEventListener('click', function () {
-                if (formAEliminar) {
-                    formAEliminar.submit();
-                }
-            });
-
-        document.getElementById('btnConfirmClear')
-            .addEventListener('click', function () {
-                if (formAVaciar) {
-                    formAVaciar.submit();
-                }
-            });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            @if(session('factura_confirmada'))
-            const modalElement = document.getElementById('modalConfirmacion');
-            if (modalElement) {
-                new bootstrap.Modal(modalElement).show();
-            }
-            @endif
-        });
-
-        function mostrarLoginModal() {
-            new bootstrap.Modal(
-                document.getElementById('loginRequiredModal')
-            ).show();
-        }
-    </script>
 
 @endsection
