@@ -98,4 +98,50 @@ class Product extends Model
     {
         return Crypt::encryptString($this->id_producto);
     }
+    public function scopeActivos($query)
+    {
+        return $query->where('estado_prod', 'ACT');
+    }
+
+    public function scopeBuscar($query, $q)
+    {
+        if (!empty($q)) {
+            $q = mb_strtolower($q);
+
+            $query->whereRaw('LOWER(pro_descripcion) LIKE ?', ['%' . $q . '%']);
+        }
+
+        return $query;
+    }
+
+
+    public function scopeFiltrarCategoria($query, $cat)
+    {
+        if (!empty($cat)) {
+            $query->where('id_categoria', $cat);
+        }
+        return $query;
+    }
+
+    public function scopeOrdenar($query, $sort)
+    {
+        switch ($sort) {
+            case 'price-asc':
+                return $query->orderBy('pro_precio_venta', 'asc');
+
+            case 'price-desc':
+                return $query->orderBy('pro_precio_venta', 'desc');
+
+            case 'name-asc':
+                return $query->orderBy('pro_descripcion', 'asc');
+
+            case 'name-desc':
+                return $query->orderBy('pro_descripcion', 'desc');
+
+            default:
+                return $query->orderBy('id_producto', 'desc');
+        }
+    }
+
+
 }
