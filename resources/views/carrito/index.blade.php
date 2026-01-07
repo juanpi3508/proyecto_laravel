@@ -38,8 +38,8 @@
                     </div>
                 @endif
 
-                <div class="card mb-3" style="background-color:#f6e6a5;">
-                    <div class="card-body py-2">
+                <div class="card mb-3 d-none d-md-block" style="background-color:#f6e6a5;">
+                <div class="card-body py-2">
                         <div class="row text-center fw-bold">
                             <div class="col-5">Producto</div>
                             <div class="col-2">Precio</div>
@@ -64,9 +64,9 @@
 
                         <div class="card mb-3">
                             <div class="card-body">
-                                <div class="row align-items-center text-center">
+                                <div class="row align-items-center text-center d-none d-md-flex">
 
-                                    <div class="col-5 d-flex align-items-center text-start">
+                                <div class="col-5 d-flex align-items-center text-start">
 
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
@@ -149,6 +149,73 @@
 
                                     <div class="col-2 fw-bold">
                                         ${{ number_format($item->subtotal, 2) }}
+                                    </div>
+
+                                </div>
+                                <div class="d-md-none">
+
+                                    <div class="d-flex align-items-center gap-1 w-100 overflow-hidden">
+
+                                        {{-- ELIMINAR --}}
+                                        <button type="button"
+                                                class="btn btn-link text-danger p-0 lh-1"
+                                                onclick="confirmarEliminacion(this)">
+                                            <i class="bi bi-x-lg" style="font-size:0.85rem;"></i>
+                                        </button>
+
+                                        {{-- IMAGEN --}}
+                                        <img src="{{ Storage::url($item->imagen) }}"
+                                             class="rounded"
+                                             style="width:36px;height:36px;object-fit:cover;flex-shrink:0;">
+
+                                        {{-- DESCRIPCIÓN (ULTRA COMPACTA) --}}
+                                        <div class="flex-grow-1 overflow-hidden" style="line-height:1.05;">
+                                            <small class="text-truncate d-block">
+                                                <small>{{ $item->descripcion }}</small>
+                                            </small>
+                                            <small class="text-muted d-block">
+                                                <small>${{ number_format($item->precio, 2) }}</small>
+                                            </small>
+                                        </div>
+
+                                        {{-- CANTIDAD --}}
+                                        <div class="d-flex align-items-center gap-1 flex-shrink-0 lh-1">
+
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
+                                                @csrf @method('PUT')
+                                                <input type="hidden" name="cantidad" value="{{ $item->cantidad - 1 }}">
+                                                <button type="submit"
+                                                        class="btn btn-outline-secondary btn-sm px-1 py-0"
+                                                    @disabled($item->cantidad <= 1)>−</button>
+                                            </form>
+
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
+                                                @csrf @method('PUT')
+                                                <input type="number"
+                                                       name="cantidad"
+                                                       value="{{ $item->cantidad }}"
+                                                       min="1"
+                                                       max="{{ $item->stock }}"
+                                                       class="form-control form-control-sm text-center py-0"
+                                                       style="width:40px;"
+                                                       onblur="if(this.value!=this.defaultValue)this.form.submit()">
+                                            </form>
+
+                                            <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
+                                                @csrf @method('PUT')
+                                                <input type="hidden" name="cantidad" value="{{ $item->cantidad + 1 }}">
+                                                <button type="submit"
+                                                        class="btn btn-outline-secondary btn-sm px-1 py-0"
+                                                    @disabled($item->cantidad >= $item->stock)>+</button>
+                                            </form>
+
+                                        </div>
+
+                                        {{-- SUBTOTAL --}}
+                                        <small class="fw-bold text-nowrap flex-shrink-0">
+                                            ${{ number_format($item->subtotal, 2) }}
+                                        </small>
+
                                     </div>
 
                                 </div>
