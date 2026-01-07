@@ -83,7 +83,7 @@
                                         <a href="{{ route('productos.show', $token) }}"
                                            class="d-flex align-items-center text-decoration-none text-dark">
 
-                                            <img src="{{ Storage::url($item->imagen) }}"
+                                            <img src="{{($item->imagen) }}"
                                                  class="rounded me-3"
                                                  style="width:60px;height:60px;object-fit:cover;"
                                                  alt="{{ $item->descripcion }}">
@@ -164,7 +164,7 @@
                                         </button>
 
                                         {{-- IMAGEN --}}
-                                        <img src="{{ Storage::url($item->imagen) }}"
+                                        <img src="{{($item->imagen) }}"
                                              class="rounded"
                                              style="width:36px;height:36px;object-fit:cover;flex-shrink:0;">
 
