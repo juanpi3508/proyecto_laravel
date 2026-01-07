@@ -2,50 +2,68 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DetalleCarrito extends Model
+class DetalleCarrito
 {
-    protected $table = 'detalle_carrito';
+    public string $id_producto;
+    public int $cantidad;
+    public float $precio_unitario;
+    public int $stock;
+    public ?string $descripcion;
+    public ?string $imagen;
 
-    public $timestamps = false;
+    public function __construct(
+        string $id_producto,
+        int $cantidad,
+        float $precio_unitario,
+        int $stock,
+        ?string $descripcion = null,
+        ?string $imagen = null
+    ) {
+        $this->id_producto = $id_producto;
+        $this->cantidad = max(1, $cantidad);
+        $this->precio_unitario = $precio_unitario;
+        $this->stock = max(0, $stock);
+        $this->descripcion = $descripcion;
+        $this->imagen = $imagen;
 
-    protected $fillable = [
-        'id_carrito',
-        'id_producto',
-        'cantidad',
-        'precio_unitario'
-    ];
-
-    protected $casts = [
-        'cantidad' => 'integer',
-        'precio_unitario' => 'float'
-    ];
-    public function producto()
-    {
-        return $this->belongsTo(
-            Product::class,
-            'id_producto',
-            'id_producto'
-        );
+        $this->normalizarCantidad();
     }
 
-    public function carrito()
-    {
-        return $this->belongsTo(
-            Carrito::class,
-            'id_carrito',
-            'codigo'
-        );
-    }
-
-    public function getSubtotalAttribute(): float
-    {
-        return $this->cantidad * $this->precio_unitario;
-    }
 
     public function incrementarCantidad(int $cantidad = 1): void
     {
         $this->cantidad += $cantidad;
+        $this->normalizarCantidad();
     }
+
+    public function actualizarCantidad(int $cantidad): void
+    {
+        $this->cantidad = $cantidad;
+        $this->normalizarCantidad();
+    }
+
+    public function subtotal(): float
+    {
+        return $this->cantidad * $this->precio_unitario;
+    }
+    private function normalizarCantidad(): void
+    {
+        if ($this->cantidad < 1) {
+            $this->cantidad = 1;
+        }
+
+        if ($this->cantidad > $this->stock) {
+            $this->cantidad = $this->stock;
+        }
+    }
+
+    public function __get(string $name)
+    {
+        return match ($name) {
+            'precio'   => $this->precio_unitario,
+            'subtotal' => $this->subtotal(),
+            default    => null,
+        };
+    }
+
 }

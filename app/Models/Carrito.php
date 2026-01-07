@@ -2,82 +2,88 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-class Carrito extends Model
+class Carrito
 {
-    protected $table = 'carritos';
+    /**
+     * @var Collection<DetalleCarrito>
+     */
+    protected Collection $items;
 
-    protected $primaryKey = 'codigo';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected float $iva;
 
-    public $timestamps = false;
-
-    protected $fillable = [
-        'codigo',
-        'fecha',
-        'iva',
-        'tipo'
-    ];
-
-    protected $casts = [
-        'fecha' => 'datetime',
-        'iva'   => 'float'
-    ];
-
-    public function detalles()
+    public function __construct(Collection $items = null, float $iva = 0.15)
     {
-        return $this->hasMany(
-            DetalleCarrito::class,
-            'id_carrito',
-            'codigo'
-        );
+        $this->items = $items ?? collect();
+        $this->iva = $iva;
     }
 
-    public function agregarProducto(Product $producto, int $cantidad = 1): void
-    {
-        $detalle = $this->detalles()
-            ->where('id_producto', $producto->id_producto)
-            ->first();
 
-        if ($detalle) {
-            $detalle->incrementarCantidad($cantidad);
-            $detalle->save();
+    public function agregarProducto(DetalleCarrito $detalle): void
+    {
+        $existente = $this->items->firstWhere(
+            'id_producto',
+            $detalle->id_producto
+        );
+
+        if ($existente) {
+            $existente->incrementarCantidad($detalle->cantidad);
         } else {
-            $this->detalles()->create([
-                'id_producto'    => $producto->id_producto,
-                'cantidad'       => $cantidad,
-                'precio_unitario'=> $producto->pro_precio_venta
-            ]);
+            $this->items->push($detalle);
         }
     }
 
     public function eliminarProducto(string $idProducto): void
     {
-        $this->detalles()
-            ->where('id_producto', $idProducto)
-            ->delete();
+        $this->items = $this->items
+            ->reject(fn ($item) => $item->id_producto === $idProducto)
+            ->values();
     }
 
     public function vaciarCarrito(): void
     {
-        $this->detalles()->delete();
+        $this->items = collect();
     }
 
     public function estaVacio(): bool
     {
-        return $this->detalles()->count() === 0;
+        return $this->items->isEmpty();
     }
 
-    public function getSubtotalAttribute(): float
+
+    public function subtotal(): float
     {
-        return $this->detalles->sum(fn ($d) => $d->subtotal);
+        return $this->items->sum(
+            fn (DetalleCarrito $d) => $d->subtotal()
+        );
     }
 
-    public function getTotalAttribute(): float
+    public function impuestos(): float
     {
-        return $this->subtotal + ($this->subtotal * $this->iva);
+        return $this->subtotal() * $this->iva;
+    }
+
+    public function total(): float
+    {
+        return $this->subtotal() + $this->impuestos();
+    }
+
+    public function totalArticulos(): int
+    {
+        return $this->items->sum(
+            fn (DetalleCarrito $d) => $d->cantidad
+        );
+    }
+
+
+    public function items(): Collection
+    {
+        return $this->items;
+    }
+
+    public function iva(): float
+    {
+        return $this->iva;
     }
 }

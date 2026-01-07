@@ -10,6 +10,7 @@ class Product extends Model
 {
     protected $table = 'productos';
     protected $primaryKey = 'id_producto';
+
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
@@ -22,48 +23,46 @@ class Product extends Model
         'pro_qty_ingresos',
         'pro_qty_egresos',
         'pro_qty_ajustes',
-        'pro_saldo_final',
         'estado_prod',
         'pro_imagen',
         'id_categoria'
     ];
 
-    // Relación con categoría
+
+    protected $guarded = [
+        'pro_saldo_fin'
+    ];
+
+    protected $casts = [
+        'id_producto'  => 'string',
+        'id_categoria' => 'string',
+    ];
+
+
     public function categoria()
     {
         return $this->belongsTo(
             Category::class,
-            'id_categoria',   // FK en products
-            'id_categoria'    // PK en categorias
-        );
-    }
-
-    protected $casts = [
-        'id_categoria' => 'string',
-        'id_producto'  => 'string',
-    ];
-
-    public function detallesCarrito()
-    {
-        return $this->hasMany(
-            DetalleCarrito::class,
-            'id_producto',
-            'id_producto'
+            'id_categoria',
+            'id_categoria'
         );
     }
 
     public function detallesFactura()
     {
-        return $this->hasMany(ProxFac::class, 'id_producto', 'id_producto');
+        return $this->hasMany(
+            ProxFac::class,
+            'id_producto',
+            'id_producto'
+        );
     }
 
-    // ==========================
-    // ACCESORES
-    // ==========================
 
-    public function getImageUrlAttribute()
+    public function getImageUrlAttribute(): string
     {
-        if (!$this->pro_imagen) return 'https://via.placeholder.com/600x600?text=Sin+imagen';
+        if (!$this->pro_imagen) {
+            return 'https://via.placeholder.com/600x600?text=Sin+imagen';
+        }
 
         $path = trim($this->pro_imagen);
 
@@ -71,34 +70,60 @@ class Product extends Model
             return $path;
         }
 
-        $path = ltrim($path, '/');
-        return asset('storage/' . $path);
+        return asset('storage/' . ltrim($path, '/'));
     }
 
-    public function getPrecioAttribute()
+    public function getPrecioAttribute(): float
     {
-        return $this->pro_precio_venta ?? 0;
+        return (float) ($this->pro_precio_venta ?? 0);
     }
 
-    public function getPrecioAnteriorAttribute()
+    public function getPrecioAnteriorAttribute(): float
     {
-        return $this->precio > 0 ? $this->precio / 0.85 : 0;
+        return $this->precio > 0 ? round($this->precio / 0.85, 2) : 0;
     }
 
-    public function getCategoriaNombreAttribute()
+    public function getCategoriaNombreAttribute(): string
     {
         return $this->categoria->cat_descripcion ?? 'Sin categoría';
     }
 
-    public function getStockAttribute()
+
+    public function getStockAttribute(): int
     {
-        return max(0, $this->pro_saldo_fin ?? 0);
+        return max(0, (int) ($this->pro_saldo_fin ?? 0));
     }
 
-    public function getTokenAttribute()
+    public function getTokenAttribute(): string
     {
         return Crypt::encryptString($this->id_producto);
     }
+
+
+    public function stockDisponible(): int
+    {
+        return $this->stock;
+    }
+
+    public function normalizarCantidad(int $cantidad): int
+    {
+        return min(
+            max(1, $cantidad),
+            $this->stockDisponible()
+        );
+    }
+
+    public function precioVenta(): float
+    {
+        return $this->precio;
+    }
+
+    public function estaAgotado(): bool
+    {
+        return $this->stockDisponible() === 0;
+    }
+
+
     public function scopeActivos($query)
     {
         return $query->where('estado_prod', 'ACT');
@@ -108,49 +133,55 @@ class Product extends Model
     {
         if (!empty($q)) {
             $q = mb_strtolower($q);
-
             $query->whereRaw('LOWER(pro_descripcion) LIKE ?', ['%' . $q . '%']);
         }
 
         return $query;
     }
 
-
     public function scopeFiltrarCategoria($query, $cat)
     {
         if (!empty($cat)) {
             $query->where('id_categoria', $cat);
         }
+
         return $query;
     }
 
     public function scopeOrdenar($query, $sort)
     {
-        switch ($sort) {
-            case 'price-asc':
-                return $query->orderBy('pro_precio_venta', 'asc');
-
-            case 'price-desc':
-                return $query->orderBy('pro_precio_venta', 'desc');
-
-            case 'name-asc':
-                return $query->orderBy('pro_descripcion', 'asc');
-
-            case 'name-desc':
-                return $query->orderBy('pro_descripcion', 'desc');
-
-            default:
-                return $query->orderBy('id_producto', 'desc');
-        }
+        return match ($sort) {
+            'price-asc'  => $query->orderBy('pro_precio_venta', 'asc'),
+            'price-desc' => $query->orderBy('pro_precio_venta', 'desc'),
+            'name-asc'   => $query->orderBy('pro_descripcion', 'asc'),
+            'name-desc'  => $query->orderBy('pro_descripcion', 'desc'),
+            default      => $query->orderBy('id_producto', 'desc'),
+        };
     }
 
 
+    public static function obtenerParaCarrito(array $carrito)
+    {
+        $ids = collect($carrito)
+            ->pluck('id_producto')
+            ->filter()
+            ->unique()
+            ->values();
 
-    public static function masVendidos($limit = 6)
+        if ($ids->isEmpty()) {
+            throw new \Exception('Carrito inválido.');
+        }
+
+        return self::whereIn('id_producto', $ids)
+            ->get()
+            ->keyBy('id_producto');
+    }
+
+    public static function masVendidos(int $limit = 6)
     {
         return self::select(
             'productos.*',
-            DB::raw('SUM(pxf.pxf_cantidad) as total_vendido')
+            DB::raw('SUM(pxf.pxf_cantidad) AS total_vendido')
         )
             ->join('proxfac as pxf', 'productos.id_producto', '=', 'pxf.id_producto')
             ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
