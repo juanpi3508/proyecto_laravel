@@ -132,11 +132,16 @@ footer {
 /* Imágenes del producto */
 .product-image-main {
     width: 100%;
+    height: 520px;
+    object-fit: contain;
+    background: #fff;
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: var(--card-radius);
     cursor: pointer;
     box-shadow: var(--shadow);
 }
+
 
 .product-thumbnail {
     width: 60px;
@@ -214,8 +219,10 @@ footer {
 /* Productos relacionados - Imágenes */
 .related-product .card-img-top {
     height: 200px;
-    object-fit: cover;
     width: 100%;
+    object-fit: contain;
+    background: #fff;
+    padding: 8px;
 }
 
 /* Productos relacionados */
