@@ -51,15 +51,6 @@
         <div class="container">
             <div class="row row-cols-2 row-cols-md-4 g-3 text-center">
 
-                @php
-                    $stats = [
-                        ['⚡','30min','Entrega Express'],
-                        ['🛒','5+','Productos'],
-                        ['🌱','100%','Frescos'],
-                        ['🕐','24/7','Disponible'],
-                    ];
-                @endphp
-
                 @foreach($stats as [$icon, $value, $label])
                     <div class="col">
                         <div class="card">
@@ -89,22 +80,16 @@
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 justify-content-center text-center">
 
                 @forelse($masVendidos as $producto)
-                    @php
-                        // Generar token cifrado como espera ProductController@show
-                        $token = Crypt::encryptString($producto->id_producto);
-                    @endphp
 
                     <div class="col d-flex justify-content-center">
 
-                        <a href="{{ route('productos.show', $token) }}"
+                        <a href="{{ route('productos.show', $producto->token) }}"
                            class="text-decoration-none text-dark w-100">
 
                             <div class="card h-100 product-card shadow-sm">
 
                                 <img
-                                    src="{{ $producto->pro_imagen
-                            ? Storage::url($producto->pro_imagen)
-                            : 'https://via.placeholder.com/300x300?text=Producto' }}"
+                                    src="{{ $producto->image_url }}"
                                     class="card-img-top mx-auto"
                                     alt="{{ $producto->pro_descripcion }}"
                                     loading="lazy"
@@ -116,7 +101,7 @@
                                     </h6>
 
                                     <p class="fw-bold mb-1">
-                                        ${{ number_format($producto->pro_precio_venta, 2) }}
+                                        ${{ number_format($producto->precio, 2) }}
                                     </p>
 
                                     <small class="text-muted">
@@ -136,8 +121,6 @@
                 @endforelse
 
             </div>
-
-
 
             <div class="text-center mt-4">
                 <a href="{{ route('catalogo.index') }}" class="product-link fw-bold">
@@ -253,14 +236,3 @@
     </section>
 
 @endsection
-
-@push('scripts')
-    <script type="module">
-        import { initHome } from "{{ asset('assets/js/controllers/homeController.js') }}";
-        $(document).ready(() => {
-            if (typeof initHome === 'function') {
-                initHome();
-            }
-        });
-    </script>
-@endpush

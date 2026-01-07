@@ -5,15 +5,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function (FacturaController $facturaController) {
-
-    $masVendidos = $facturaController->productosMasVendidos();
-
-    return view('home.index', compact('masVendidos'));
-
-})->name('home');
-
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/catalogo', [ProductController::class, 'catalogo'])
     ->name('catalogo.index');
@@ -47,7 +41,6 @@ Route::get('/historial-compras', [FacturaController::class, 'listarFacturas'])
 
 Route::get('/factura/{id}/popup', [FacturaController::class, 'detallePopup'])
     ->name('factura.popup');
-
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
