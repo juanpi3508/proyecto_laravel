@@ -16,47 +16,22 @@ class ProductController extends Controller
         $cat  = $request->input('cat');
         $sort = $request->input('sort', 'relevance');
 
-        $query = Product::with('categoria')
-            ->where('estado_prod', 'ACT');
-
-        if (!empty($q)) {
-            $query->where('pro_descripcion', 'LIKE', '%' . $q . '%');
-        }
-
-        if (!empty($cat)) {
-            $query->where('id_categoria', $cat);
-        }
-
-        switch ($sort) {
-            case 'price-asc':
-                $query->orderBy('pro_precio_venta', 'asc');
-                break;
-
-            case 'price-desc':
-                $query->orderBy('pro_precio_venta', 'desc');
-                break;
-
-            case 'name-asc':
-                $query->orderBy('pro_descripcion', 'asc');
-                break;
-
-            case 'name-desc':
-                $query->orderBy('pro_descripcion', 'desc');
-                break;
-
-            default:
-                $query->orderBy('id_producto', 'desc');
-                break;
-        }
+        $productos = Product::with('categoria')
+            ->activos()
+            ->buscar($q)
+            ->filtrarCategoria($cat)
+            ->ordenar($sort)
+            ->get();
 
         return view('catalogo.index', [
-            'productos'  => $query->get(),
+            'productos'  => $productos,
             'categorias' => Category::orderBy('cat_descripcion')->get(),
             'q'          => $q,
             'cat'        => $cat,
             'sort'       => $sort
         ]);
     }
+
 
     public function show($token)
     {

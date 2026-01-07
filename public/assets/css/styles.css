@@ -1232,3 +1232,10 @@ body:has(.error-signup[style*="display: block"]) nav {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+.catalog-product-img {
+    height: 220px;
+    width: 100%;
+    object-fit: contain;
+    background: #fff;
+}

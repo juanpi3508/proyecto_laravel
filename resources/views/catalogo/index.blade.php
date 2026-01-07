@@ -2,10 +2,6 @@
 
 @section('title', 'KoKo Market | Catálogo')
 
-@php
-    use Illuminate\Support\Facades\Crypt;
-@endphp
-
 @section('content')
 
     <!-- HEADER -->
@@ -71,25 +67,20 @@
             <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-4">
 
                 @foreach($productos as $p)
-                    @php
-                        $token = Crypt::encryptString($p->id_producto);
-                    @endphp
 
                     <div class="col">
-                        <a href="{{ route('productos.show', $token) }}"
+                        <a href="{{ route('productos.show', $p->token) }}"
                            class="card h-100 shadow-sm border-0 text-decoration-none text-dark"
                            style="transition: transform .15s ease-in-out;"
                            onmouseover="this.style.transform='translateY(-2px)'"
                            onmouseout="this.style.transform='translateY(0)'">
 
                             <!-- IMAGEN -->
-                            <img src="{{ $p->pro_imagen
-                                        ? Storage::url($p->pro_imagen)
-                                        : 'https://via.placeholder.com/600x600?text=Sin+imagen' }}"
-                                 class="card-img-top"
-                                 style="height:220px; object-fit:cover"
+                            <img src="{{ $p->image_url }}"
+                                 class="card-img-top catalog-product-img"
                                  alt="{{ $p->pro_descripcion }}"
                                  loading="lazy">
+
 
                             <div class="card-body d-flex flex-column">
 
@@ -101,12 +92,12 @@
                                 <!-- CATEGORÍA -->
                                 @if($p->categoria)
                                     <p class="text-muted small mb-2">
-                                        {{ $p->categoria->cat_descripcion }}
+                                        {{ $p->categoria_nombre }}
                                     </p>
                                 @endif
 
                                 <!-- STOCK -->
-                                @if($p->pro_saldo_fin <= 0)
+                                @if($p->stock <= 0)
                                     <span class="badge bg-secondary mb-2 align-self-start">
                                         Agotado
                                     </span>
@@ -114,7 +105,7 @@
 
                                 <!-- PRECIO -->
                                 <p class="fw-bold fs-6 mt-auto mb-0">
-                                    ${{ number_format($p->pro_precio_venta, 2) }}
+                                    ${{ number_format($p->precio, 2) }}
                                 </p>
 
                             </div>
@@ -143,25 +134,5 @@
 
 
 @push('scripts')
-    <script>
-        const form = document.getElementById('filtersForm');
-        const searchInput = document.getElementById('q');
-        const selects = document.querySelectorAll('#cat, #sort');
-
-        let typingTimer;
-        const delay = 500;
-
-        searchInput.addEventListener('input', () => {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                form.submit();
-            }, delay);
-        });
-
-        selects.forEach(select => {
-            select.addEventListener('change', () => {
-                form.submit();
-            });
-        });
-    </script>
+    <script src="{{('/assets/js/catalogo-filters.js') }}"></script>
 @endpush
