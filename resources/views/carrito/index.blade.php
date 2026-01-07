@@ -265,13 +265,24 @@
                             <span class="fw-bold fs-5">${{ number_format($total, 2) }}</span>
                         </div>
 
-                        <form method="POST" action="{{ route('factura.generar') }}">
-                            @csrf
-                            <button class="btn btn-success w-100 py-3 fw-semibold"
+                        @auth
+                            <form method="POST" action="{{ route('factura.generar') }}">
+                                @csrf
+                                <button class="btn btn-success w-100 py-3 fw-semibold"
+                                    @disabled($items->isEmpty())>
+                                    Proceder al Pago
+                                </button>
+                            </form>
+                        @endauth
+
+                        @guest
+                            <button type="button"
+                                    class="btn btn-success w-100 py-3 fw-semibold"
+                                    onclick="mostrarLoginModal()"
                                 @disabled($items->isEmpty())>
                                 Proceder al Pago
                             </button>
-                        </form>
+                        @endguest
 
                     </div>
                 </div>
@@ -357,6 +368,40 @@
             </div>
         </div>
     </div>
+    <div class="modal fade"
+         id="loginRequiredModal"
+         tabindex="-1"
+         data-bs-backdrop="static"
+         data-bs-keyboard="false">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Inicio de sesión requerido</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <p class="mb-0">
+                        Para finalizar tu compra necesitas iniciar sesión.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <a href="{{ route('login') }}"
+                       class="btn btn-primary">
+                        Ir a iniciar sesión
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <script>
         let formAEliminar = null;
@@ -398,6 +443,12 @@
             }
             @endif
         });
+
+        function mostrarLoginModal() {
+            new bootstrap.Modal(
+                document.getElementById('loginRequiredModal')
+            ).show();
+        }
     </script>
 
 @endsection
