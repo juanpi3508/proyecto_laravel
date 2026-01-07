@@ -8,17 +8,14 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 
-
 class ProductController extends Controller
 {
     public function catalogo(Request $request)
     {
-        // Parámetros de filtros
         $q    = $request->input('q');
         $cat  = $request->input('cat');
         $sort = $request->input('sort', 'relevance');
 
-        // Query base del catálogo
         $query = Product::with('categoria')
             ->where('estado_prod', 'ACT');
 
@@ -48,12 +45,10 @@ class ProductController extends Controller
                 break;
 
             default:
-                // Relevancia / recientes
                 $query->orderBy('id_producto', 'desc');
                 break;
         }
 
-        // Retorno a la vista
         return view('catalogo.index', [
             'productos'  => $query->get(),
             'categorias' => Category::orderBy('cat_descripcion')->get(),
@@ -66,9 +61,9 @@ class ProductController extends Controller
     public function show($token)
     {
         try {
-            $id = Crypt::decryptString($token); // aquí recuperas PRD0000001
+            $id = Crypt::decryptString($token);
         } catch (DecryptException $e) {
-            abort(404); // token inválido
+            abort(404);
         }
 
         $producto = Product::with('categoria')
@@ -76,7 +71,8 @@ class ProductController extends Controller
             ->where('estado_prod', 'ACT')
             ->firstOrFail();
 
-        $relacionados = Product::where('estado_prod', 'ACT')
+        $relacionados = Product::with('categoria')
+            ->where('estado_prod', 'ACT')
             ->where('id_categoria', $producto->id_categoria)
             ->where('id_producto', '!=', $producto->id_producto)
             ->limit(4)
@@ -84,5 +80,4 @@ class ProductController extends Controller
 
         return view('productos.show', compact('producto', 'relacionados'));
     }
-
 }

@@ -2,29 +2,6 @@
 
 @section('title', 'KoKo Market | ' . $producto->pro_descripcion)
 
-@php
-    use Illuminate\Support\Facades\Crypt;
-
-    function productImageUrl($path) {
-        if (!$path) return 'https://via.placeholder.com/600x600?text=Sin+imagen';
-
-        $path = trim($path);
-
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        $path = ltrim($path, '/');
-        return asset('storage/' . $path);
-    }
-
-    $img = productImageUrl($producto->pro_imagen);
-    $precio = $producto->pro_precio_venta ?? 0;
-    $precioAnterior = $precio > 0 ? $precio / 0.85 : 0;
-    $categoriaNombre = $producto->categoria->cat_descripcion ?? 'Sin categoría';
-    $stock = max(0, $producto->pro_saldo_fin ?? 0);
-@endphp
-
 @section('content')
 
     {{-- MENSAJES --}}
@@ -57,7 +34,7 @@
                     <li class="breadcrumb-item">
                         <a href="{{ route('catalogo.index', ['cat' => $producto->categoria->id_categoria]) }}"
                            class="text-decoration-none">
-                            {{ $categoriaNombre }}
+                            {{ $producto->categoria_nombre }}
                         </a>
                     </li>
                 @endif
@@ -73,7 +50,7 @@
 
             {{-- IMÁGENES --}}
             <div class="col-md-5 mb-4">
-                <img src="{{ $img }}" class="product-image-main mb-3" alt="{{ $producto->pro_descripcion }}">
+                <img src="{{ $producto->image_url }}" class="product-image-main mb-3" alt="{{ $producto->pro_descripcion }}">
             </div>
 
             {{-- INFO --}}
@@ -81,13 +58,13 @@
                 <h1 class="h3 fw-bold">{{ $producto->pro_descripcion }}</h1>
 
                 <div class="mb-2">
-                    <span class="fw-semibold">Categoría:</span> {{ $categoriaNombre }}
+                    <span class="fw-semibold">Categoría:</span> {{ $producto->categoria_nombre }}
                 </div>
 
                 <div class="mb-3">
-                    <span class="h3 fw-bold product-price">${{ number_format($precio,2) }}</span>
+                    <span class="h3 fw-bold product-price">${{ number_format($producto->precio,2) }}</span>
                     <div class="small text-muted">
-                        Precio anterior: ${{ number_format($precioAnterior,2) }}
+                        Precio anterior: ${{ number_format($producto->precio_anterior,2) }}
                     </div>
                 </div>
 
@@ -97,8 +74,8 @@
                 </div>
 
                 <div class="p-3 bg-light rounded">
-                    @if($stock > 0)
-                        <span class="badge-stock">En stock ({{ $stock }})</span>
+                    @if($producto->stock > 0)
+                        <span class="badge-stock">En stock ({{ $producto->stock }})</span>
                     @else
                         <span class="badge bg-danger">Agotado</span>
                     @endif
@@ -109,7 +86,7 @@
             <div class="col-md-3">
                 <div class="sticky-top" style="top:80px">
 
-                    <div class="h4 fw-bold mb-3">${{ number_format($precio,2) }}</div>
+                    <div class="h4 fw-bold mb-3">${{ number_format($producto->precio,2) }}</div>
 
                     <form method="POST"
                           action="{{ route('carrito.store') }}"
@@ -121,9 +98,9 @@
                         <label class="form-label small fw-semibold">Cantidad</label>
                         <select name="cantidad"
                                 class="form-select mb-3"
-                            {{ $stock <= 0 ? 'disabled' : '' }}>
+                            {{ $producto->stock <= 0 ? 'disabled' : '' }}>
                             @foreach([1,2,3,4,5,10] as $cant)
-                                @if($cant <= $stock)
+                                @if($cant <= $producto->stock)
                                     <option value="{{ $cant }}">{{ $cant }}</option>
                                 @endif
                             @endforeach
@@ -132,7 +109,7 @@
                         {{-- AGREGAR --}}
                         <button type="submit"
                                 class="btn btn-add-cart w-100 mb-2"
-                            {{ $stock <= 0 ? 'disabled' : '' }}>
+                            {{ $producto->stock <= 0 ? 'disabled' : '' }}>
                             <i class="bi bi-cart-plus me-1"></i>
                             Agregar al carrito
                         </button>
@@ -142,7 +119,7 @@
                                 name="redirect"
                                 value="1"
                                 class="btn btn-buy-now w-100"
-                            {{ $stock <= 0 ? 'disabled' : '' }}>
+                            {{ $producto->stock <= 0 ? 'disabled' : '' }}>
                             <i class="bi bi-lightning-fill me-1"></i>
                             Comprar ahora
                         </button>
@@ -159,32 +136,28 @@
                     <div class="row row-cols-2 row-cols-md-4 g-3">
 
                         @forelse($relacionados as $rel)
-                            @php
-                                $tokenRel = Crypt::encryptString($rel->id_producto);
-                                $imgRel = productImageUrl($rel->pro_imagen);
-                            @endphp
 
                             <div class="col">
                                 <div class="card related-product h-100 shadow-sm">
-                                    <a href="{{ route('productos.show', $tokenRel) }}"
+                                    <a href="{{ route('productos.show', $rel->token) }}"
                                        class="text-decoration-none text-reset">
-                                        <img src="{{ $imgRel }}" class="card-img-top">
+                                        <img src="{{ $rel->image_url }}" class="card-img-top">
                                     </a>
 
                                     <div class="card-body">
                                         <h6 class="small fw-semibold mb-1">
-                                            <a href="{{ route('productos.show', $tokenRel) }}"
+                                            <a href="{{ route('productos.show', $rel->token) }}"
                                                class="text-decoration-none text-reset">
                                                 {{ $rel->pro_descripcion }}
                                             </a>
                                         </h6>
 
                                         <p class="text-muted small mb-2">
-                                            {{ $rel->categoria->cat_descripcion ?? '' }}
+                                            {{ $rel->categoria_nombre }}
                                         </p>
 
                                         <p class="fw-bold mb-0 product-price">
-                                            ${{ number_format($rel->pro_precio_venta,2) }}
+                                            ${{ number_format($rel->precio,2) }}
                                         </p>
                                     </div>
                                 </div>

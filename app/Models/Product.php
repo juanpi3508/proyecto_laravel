@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class Product extends Model
 {
@@ -25,7 +26,8 @@ class Product extends Model
         'pro_imagen',
         'id_categoria'
     ];
-// Relación con categoría
+
+    // Relación con categoría
     public function categoria()
     {
         return $this->belongsTo(
@@ -54,5 +56,46 @@ class Product extends Model
         return $this->hasMany(ProxFac::class, 'id_producto', 'id_producto');
     }
 
-}
+    // ==========================
+    // ACCESORES
+    // ==========================
 
+    public function getImageUrlAttribute()
+    {
+        if (!$this->pro_imagen) return 'https://via.placeholder.com/600x600?text=Sin+imagen';
+
+        $path = trim($this->pro_imagen);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+        return asset('storage/' . $path);
+    }
+
+    public function getPrecioAttribute()
+    {
+        return $this->pro_precio_venta ?? 0;
+    }
+
+    public function getPrecioAnteriorAttribute()
+    {
+        return $this->precio > 0 ? $this->precio / 0.85 : 0;
+    }
+
+    public function getCategoriaNombreAttribute()
+    {
+        return $this->categoria->cat_descripcion ?? 'Sin categoría';
+    }
+
+    public function getStockAttribute()
+    {
+        return max(0, $this->pro_saldo_fin ?? 0);
+    }
+
+    public function getTokenAttribute()
+    {
+        return Crypt::encryptString($this->id_producto);
+    }
+}
