@@ -81,7 +81,7 @@ class FacturaController extends Controller
                 'fac_iva' => $iva,
                 'fac_total' => $total,
                 'fac_tipo' => 'ECO',
-                'estado_fac' => 'ABR',
+                'estado_fac' => 'ABI',
             ]);
 
             foreach ($carrito as $item) {
@@ -93,7 +93,7 @@ class FacturaController extends Controller
                     'pxf_cantidad' => $item['cantidad'],
                     'pxf_precio_venta' => $producto->pro_precio_venta,
                     'pxf_subtotal_producto' => $producto->pro_precio_venta * $item['cantidad'],
-                    'estado_pxf' => 'ABR',
+                    'estado_pxf' => 'ABI',
                 ]);
             }
         });
@@ -110,7 +110,7 @@ class FacturaController extends Controller
     {
         $factura = Factura::findOrFail($idFactura);
 
-        if ($factura->estado_fac !== 'ABR') {
+        if ($factura->estado_fac !== 'ABI') {
             return redirect()->route('factura.show', $idFactura);
         }
 
@@ -119,37 +119,41 @@ class FacturaController extends Controller
 
     public function aprobar($idFactura)
     {
-        DB::transaction(function () use ($idFactura) {
+        try {
 
-            $factura = Factura::with('detalles')->findOrFail($idFactura);
+            $resultado = DB::selectOne(
+                "SELECT fn_aprobar_factura_json(?) AS resultado",
+                [$idFactura]
+            );
 
-            foreach ($factura->detalles as $detalle) {
 
-                $producto = Product::findOrFail($detalle->id_producto);
+            $json = json_decode($resultado->resultado, true);
 
-                if ($producto->pro_saldo_fin < $detalle->pxf_cantidad) {
-                    throw new \Exception('Stock insuficiente');
-                }
 
-                $producto->pro_qty_egresos += $detalle->pxf_cantidad;
-                $producto->pro_saldo_fin -= $detalle->pxf_cantidad;
-                $producto->save();
-
-                $detalle->estado_pxf = 'APR';
-                $detalle->save();
+            if (!$json || !isset($json['ok'])) {
+                throw new \Exception('Respuesta inválida del sistema de aprobación');
             }
 
-            $factura->estado_fac = 'APR';
-            $factura->save();
-        });
+            if ($json['ok'] === false) {
+                return redirect()
+                    ->back()
+                    ->with('error', $json['mensaje'] ?? 'No se pudo aprobar la factura');
+            }
 
-        session()->forget('carrito');
+            session()->forget('carrito');
 
-        return redirect()
-            ->route('catalogo.index')
-            ->with('success', 'Compra realizada correctamente.');
+            return redirect()
+                ->route('catalogo.index')
+                ->with('success', $json['mensaje']);
 
+        } catch (\Throwable $e) {
+
+            return redirect()
+                ->back()
+                ->with('error', 'Error al aprobar factura: ' . $e->getMessage());
+        }
     }
+
 
     public function listarFacturas()
     {
