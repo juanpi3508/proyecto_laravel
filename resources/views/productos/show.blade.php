@@ -73,7 +73,7 @@
                     <p class="small">{{ $producto->pro_descripcion }}</p>
                 </div>
 
-                <div class="p-3 bg-light rounded">
+                <div class="p-3">
                     @if($producto->stock > 0)
                         <span class="badge-stock">En stock ({{ $producto->stock }})</span>
                     @else
@@ -141,7 +141,7 @@
                                 <div class="card related-product h-100 shadow-sm">
                                     <a href="{{ route('productos.show', $rel->token) }}"
                                        class="text-decoration-none text-reset">
-                                        <img src="{{ $rel->image_url }}" class="card-img-top">
+                                        <img src="{{ $rel->image_url }}" class="card-img-top related-product-img">
                                     </a>
 
                                     <div class="card-body">
