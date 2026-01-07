@@ -120,25 +120,25 @@ class FacturaController extends Controller
     public function aprobar($idFactura)
     {
         try {
-            // Ejecuta la función PostgreSQL
+
             $resultado = DB::selectOne(
                 "SELECT fn_aprobar_factura_json(?) AS resultado",
                 [$idFactura]
             );
 
-            // PostgreSQL devuelve JSON como string → decodificamos
+
             $json = json_decode($resultado->resultado, true);
 
-            // Validación de respuesta
+
             if (!$json || !isset($json['ok'])) {
                 throw new \Exception('Respuesta inválida del sistema de aprobación');
             }
 
-            // Si el SP devuelve error lógico
             if ($json['ok'] === false) {
-                dd($json); // 👈 MUESTRA EL ERROR REAL
+                return redirect()
+                    ->back()
+                    ->with('error', $json['mensaje'] ?? 'No se pudo aprobar la factura');
             }
-
 
             session()->forget('carrito');
 
