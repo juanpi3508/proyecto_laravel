@@ -84,7 +84,7 @@
 
                             <!-- IMAGEN -->
                             <img src="{{ $p->pro_imagen
-                                        ? asset($p->pro_imagen)
+                                        ? Storage::url($p->pro_imagen)
                                         : 'https://via.placeholder.com/600x600?text=Sin+imagen' }}"
                                  class="card-img-top"
                                  style="height:220px; object-fit:cover"
