@@ -6,6 +6,7 @@
 
     <title>@yield('title', 'KoKo Market')</title>
     <meta name="description" content="@yield('meta_description', 'KoKo Market - Supermercado ecuatoriano')">
+    <link rel="icon" type="image/jpeg" href="{{ asset('assets/img/logo-removebg.png') }}">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
