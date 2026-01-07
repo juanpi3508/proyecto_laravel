@@ -31,7 +31,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn btn-danger" id="btnConfirmDelete">Eliminar</button>
+                <button class="btn btn-danger" id="btnConfirmDelete">Aceptar</button>
             </div>
         </div>
     </div>
@@ -48,7 +48,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn btn-danger" id="btnConfirmClear">Vaciar carrito</button>
+                <button class="btn btn-danger" id="btnConfirmClear">Aceptar</button>
             </div>
         </div>
     </div>
