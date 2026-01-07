@@ -143,9 +143,10 @@
                         </button>
 
                         {{-- COMPRAR AHORA --}}
-                        <button type="button"
+                        <button type="submit"
+                                name="redirect"
+                                value="1"
                                 class="btn btn-buy-now w-100"
-                                onclick="comprarAhora()"
                             {{ $stock <= 0 ? 'disabled' : '' }}>
                             <i class="bi bi-lightning-fill me-1"></i>
                             Comprar ahora
@@ -203,16 +204,5 @@
 
         </div>
     </main>
-
-    <script>
-        function comprarAhora() {
-            const form = document.getElementById('formAgregarCarrito');
-            form.submit();
-
-            setTimeout(() => {
-                window.location.href = "{{ route('carrito.index') }}";
-            }, 300);
-        }
-    </script>
 
 @endsection
