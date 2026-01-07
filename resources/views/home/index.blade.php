@@ -34,7 +34,7 @@
                 <div class="col-lg-6">
                     <div class="img-wrapper" style="height: 400px; overflow: hidden;">
                         <img
-                            src="https://images.unsplash.com/photo-1542838132-92c53300491e"
+                            src="{{ asset('assets/img/photo-1542838132-92c53300491e.jpg') }}"
                             alt="Productos frescos en KoKo Market"
                             style="width:100%; height:100%; object-fit:cover;"
                             loading="lazy"
@@ -90,7 +90,7 @@
 
                                 <img
                                     src="{{ $producto->image_url }}"
-                                    class="card-img-top mx-auto"
+                                    class="card-img-top mx-auto home-top-product-img"
                                     alt="{{ $producto->pro_descripcion }}"
                                     loading="lazy"
                                 >
@@ -139,7 +139,7 @@
                 <div class="col-lg-5">
                     <div class="img-wrapper" style="height: 450px; overflow: hidden;">
                         <img
-                            src="https://media.istockphoto.com/id/1223013236/es/foto/vendedor-de-frutas-en-el-mercado-de-otavalo-ecuador.jpg?s=612x612&w=0&k=20&c=bP72WZXp12pOvZUXFF2dGzhZ8VFOGuZP9pJU8VlvNaM="
+                            src="{{ asset('assets/img/istockphoto-1223013236-612x612.jpg') }}"
                             alt="Mercado tradicional de Quito"
                             style="width:100%; height:100%; object-fit:cover;"
                             loading="lazy"

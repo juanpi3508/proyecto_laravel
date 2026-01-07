@@ -142,6 +142,13 @@ footer {
     box-shadow: var(--shadow);
 }
 
+@media (max-width: 768px) {
+    .product-image-main {
+        height: 360px;
+        padding: 8px;
+    }
+}
+
 
 .product-thumbnail {
     width: 60px;
@@ -1245,4 +1252,12 @@ body:has(.error-signup[style*="display: block"]) nav {
     width: 100%;
     object-fit: contain;
     background: #fff;
+}
+
+.home-top-product-img {
+    height: 160px;
+    width: 100%;
+    object-fit: contain;
+    background: #fff;
+    padding: 8px;
 }
