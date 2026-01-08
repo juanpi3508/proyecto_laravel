@@ -30,7 +30,7 @@ class DetalleCarrito
         $this->normalizarCantidad();
     }
 
-    public function incrementarCantidad(int $cantidad = null): void
+    public function incrementarCantidad(?int $cantidad = null): void
     {
         $this->cantidad += $cantidad ?? config('carrito.cantidad.min');
         $this->normalizarCantidad();
@@ -49,6 +49,12 @@ class DetalleCarrito
 
     private function normalizarCantidad(): void
     {
+        // Si no hay stock, no debería haber cantidad
+        if ($this->stock === 0) {
+            $this->cantidad = 0;
+            return;
+        }
+
         if ($this->cantidad < config('carrito.cantidad.min')) {
             $this->cantidad = config('carrito.cantidad.min');
         }

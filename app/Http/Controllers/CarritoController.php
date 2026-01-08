@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Carrito;
 use App\Models\DetalleCarrito;
+use App\Constants\ProductColumns as Col;
 
 class CarritoController extends Controller
 {
@@ -26,11 +27,11 @@ class CarritoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_producto' => 'required|exists:productos,id_producto',
-            'cantidad'    => 'required|integer|min:' . config('carrito.cantidad.min'),
+            Col::PK => 'required|exists:' . Col::TABLE . ',' . Col::PK,
+            'cantidad' => 'required|integer|min:' . config('carrito.cantidad.min'),
         ]);
 
-        $producto = Product::findOrFail($request->id_producto);
+        $producto = Product::findOrFail($request->input(Col::PK));
 
         if ($producto->estaAgotado()) {
             return back()->with(
@@ -41,8 +42,10 @@ class CarritoController extends Controller
 
         $carrito = $this->construirCarritoDesdeSesion($request);
 
-        $cantidadActual = $this->cantidadEnCarrito($carrito, $producto->id_producto);
-        $cantidadTotal  = $cantidadActual + $request->cantidad;
+        $productoId = (string) $producto->getKey();
+
+        $cantidadActual = $this->cantidadEnCarrito($carrito, $productoId);
+        $cantidadTotal  = $cantidadActual + (int) $request->cantidad;
 
         if ($cantidadTotal > $producto->stockDisponible()) {
             return back()->with(
@@ -56,11 +59,11 @@ class CarritoController extends Controller
         }
 
         $detalle = new DetalleCarrito(
-            $producto->id_producto,
-            $request->cantidad,
+            $productoId,
+            (int) $request->cantidad,
             $producto->precioVenta(),
             $producto->stockDisponible(),
-            $producto->pro_descripcion,
+            $producto->{Col::DESCRIPCION},
             $producto->image_url
         );
 
@@ -127,12 +130,11 @@ class CarritoController extends Controller
             );
     }
 
-
     public function destroy(Request $request, string $idProducto)
     {
         $carrito = $this->construirCarritoDesdeSesion($request);
 
-        if ($carrito->items()->firstWhere('id_producto', $idProducto)) {
+        if ($carrito->items()->firstWhere(Col::PK, $idProducto)) {
             $carrito->eliminarProducto($idProducto);
             $this->guardarCarritoEnSesion($request, $carrito);
 
@@ -146,7 +148,6 @@ class CarritoController extends Controller
 
         return redirect()->route('carrito.index');
     }
-
 
     public function clear(Request $request)
     {
@@ -164,7 +165,6 @@ class CarritoController extends Controller
         return redirect()->route('carrito.index');
     }
 
-
     private function construirCarritoDesdeSesion(Request $request): Carrito
     {
         $data = collect(
@@ -175,20 +175,20 @@ class CarritoController extends Controller
             return new Carrito();
         }
 
-        $productos = Product::whereIn(
-            'id_producto',
-            $data->keys()
-        )->get()->keyBy('id_producto');
+        // keys() del session array son IDs de producto
+        $productos = Product::whereIn(Col::PK, $data->keys())
+            ->get()
+            ->keyBy(Col::PK);
 
         $items = $data->map(function ($row) use ($productos) {
-            $producto = $productos[$row['id_producto']];
+            $producto = $productos[$row[Col::PK]];
 
             return new DetalleCarrito(
-                $producto->id_producto,
-                $producto->normalizarCantidad($row['cantidad']),
+                (string) $producto->getKey(),
+                $producto->normalizarCantidad((int) $row['cantidad']),
                 $producto->precioVenta(),
                 $producto->stockDisponible(),
-                $producto->pro_descripcion,
+                $producto->{Col::DESCRIPCION},
                 $producto->image_url
             );
         });
@@ -202,8 +202,8 @@ class CarritoController extends Controller
             config('carrito.session_key'),
             $carrito->items()->mapWithKeys(fn ($item) => [
                 $item->id_producto => [
-                    'id_producto' => $item->id_producto,
-                    'cantidad'    => $item->cantidad,
+                    Col::PK     => $item->id_producto,
+                    'cantidad'  => $item->cantidad,
                 ],
             ])->toArray()
         );
@@ -211,7 +211,7 @@ class CarritoController extends Controller
 
     private function cantidadEnCarrito(Carrito $carrito, string $idProducto): int
     {
-        $item = $carrito->items()->firstWhere('id_producto', $idProducto);
-        return $item ? $item->cantidad : 0;
+        $item = $carrito->items()->firstWhere(Col::PK, $idProducto);
+        return $item ? (int) $item->cantidad : 0;
     }
 }

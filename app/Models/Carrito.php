@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Collection;
+use App\Constants\ProductColumns as Col;
 
 class Carrito
 {
@@ -21,7 +22,7 @@ class Carrito
     public function agregarProducto(DetalleCarrito $detalle): void
     {
         $existente = $this->items->firstWhere(
-            'id_producto',
+            Col::PK,
             $detalle->id_producto
         );
 

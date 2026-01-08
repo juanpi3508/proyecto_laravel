@@ -4,6 +4,7 @@ namespace App\Constants;
 
 final class FacturaColumns
 {
+    public const TABLE = 'facturas';
     public const ID       = 'id_factura';
     public const CLIENTE  = 'id_cliente';
     public const SUBTOTAL = 'fac_subtotal';

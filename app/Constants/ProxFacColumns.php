@@ -4,6 +4,7 @@ namespace App\Constants;
 
 final class ProxFacColumns
 {
+    public const TABLE = 'proxfac';
     public const FACTURA  = 'id_factura';
     public const PRODUCTO = 'id_producto';
     public const CANTIDAD = 'pxf_cantidad';
