@@ -73,7 +73,7 @@
                     <p class="small">{{ $producto->pro_descripcion }}</p>
                 </div>
 
-                <div class="p-3">
+                <div class="p-1">
                     @if($producto->stock > 0)
                         <span class="badge-stock">En stock ({{ $producto->stock }})</span>
                     @else
