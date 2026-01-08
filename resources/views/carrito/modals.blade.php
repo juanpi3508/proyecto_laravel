@@ -6,7 +6,7 @@
                     <h5 class="modal-title">Pasarela de Pago</h5>
                 </div>
                 <div class="modal-body text-center">
-                    <p class="mb-2">Tu compra se realizó correctamente.</p>
+                    <p class="mb-2">Compra realizada con éxito.</p>
                     <p class="fw-bold">Factura Nº {{ session('id_factura') }}</p>
                 </div>
                 <div class="modal-footer">
@@ -27,7 +27,7 @@
                 <h5 class="modal-title">Confirmar eliminación</h5>
             </div>
             <div class="modal-body text-center">
-                ¿Estás seguro de eliminar este producto del carrito?
+                ¿Está seguro de eliminar el producto del carrito?
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>

@@ -6,22 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Carrito;
 use App\Models\DetalleCarrito;
-use Illuminate\Support\Collection;
 
 class CarritoController extends Controller
 {
-
     public function index(Request $request)
     {
         $carrito = $this->construirCarritoDesdeSesion($request);
 
         return view('carrito.index', [
-            'items'      => $carrito->items(),
-            'subtotal'   => $carrito->subtotal(),
-            'iva'        => $carrito->iva(),
-            'impuestos'  => $carrito->impuestos(),
-            'total'      => $carrito->total(),
-            'articulos'  => $carrito->totalArticulos(),
+            'items'     => $carrito->items(),
+            'subtotal'  => $carrito->subtotal(),
+            'iva'       => $carrito->iva(),
+            'impuestos' => $carrito->impuestos(),
+            'total'     => $carrito->total(),
+            'articulos' => $carrito->totalArticulos(),
         ]);
     }
 
@@ -29,7 +27,7 @@ class CarritoController extends Controller
     {
         $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
-            'cantidad'    => 'required|integer|min:1'
+            'cantidad'    => 'required|integer|min:' . config('carrito.cantidad.min'),
         ]);
 
         $producto = Product::findOrFail($request->id_producto);
@@ -37,19 +35,23 @@ class CarritoController extends Controller
         if ($producto->estaAgotado()) {
             return back()->with(
                 'mensaje_stock',
-                'Este producto se encuentra agotado.'
+                config('carrito.messages.agotado')
             );
         }
 
         $carrito = $this->construirCarritoDesdeSesion($request);
 
         $cantidadActual = $this->cantidadEnCarrito($carrito, $producto->id_producto);
-        $total = $cantidadActual + $request->cantidad;
+        $cantidadTotal  = $cantidadActual + $request->cantidad;
 
-        if ($total > $producto->stockDisponible()) {
+        if ($cantidadTotal > $producto->stockDisponible()) {
             return back()->with(
                 'mensaje_stock',
-                "Stock insuficiente. Disponible: {$producto->stockDisponible()}."
+                str_replace(
+                    ':stock',
+                    $producto->stockDisponible(),
+                    config('carrito.messages.stock_insuficiente_disponible')
+                )
             );
         }
 
@@ -67,22 +69,23 @@ class CarritoController extends Controller
         $this->guardarCarritoEnSesion($request, $carrito);
 
         return $request->boolean('redirect')
-            ? redirect()->route('carrito.index')->with('success', 'Producto agregado al carrito.')
-            : back()->with('success', 'Producto agregado correctamente.');
+            ? redirect()
+                ->route('carrito.index')
+                ->with('success', config('carrito.messages.agregado'))
+            : back()->with('success', config('carrito.messages.agregado'));
     }
-
-
 
     public function update(Request $request, string $idProducto)
     {
         $request->validate([
-            'cantidad' => 'required|integer'
+            'cantidad' => 'required|integer',
         ]);
 
         $producto = Product::findOrFail($idProducto);
         $carrito  = $this->construirCarritoDesdeSesion($request);
 
-        $cantidadFinal = $producto->normalizarCantidad($request->cantidad);
+        $cantidadSolicitada = (int) $request->cantidad;
+        $cantidadFinal = $producto->normalizarCantidad($cantidadSolicitada);
 
         foreach ($carrito->items() as $item) {
             if ($item->id_producto === $idProducto) {
@@ -93,12 +96,51 @@ class CarritoController extends Controller
 
         $this->guardarCarritoEnSesion($request, $carrito);
 
-        if ($cantidadFinal !== (int) $request->cantidad) {
+        if ($cantidadFinal !== $cantidadSolicitada) {
+
+            if ($cantidadSolicitada < config('carrito.cantidad.min')) {
+                return redirect()
+                    ->route('carrito.index')
+                    ->with(
+                        'mensaje_stock',
+                        str_replace(
+                            ':min',
+                            config('carrito.cantidad.min'),
+                            config('carrito.messages.cantidad_minima')
+                        )
+                    );
+            }
+
             return redirect()
                 ->route('carrito.index')
                 ->with(
                     'mensaje_stock',
-                    'La cantidad fue ajustada según el stock disponible.'
+                    config('carrito.messages.stock_insuficiente')
+                );
+        }
+
+        return redirect()
+            ->route('carrito.index')
+            ->with(
+                'success',
+                config('carrito.messages.cantidad_actualizada')
+            );
+    }
+
+
+    public function destroy(Request $request, string $idProducto)
+    {
+        $carrito = $this->construirCarritoDesdeSesion($request);
+
+        if ($carrito->items()->firstWhere('id_producto', $idProducto)) {
+            $carrito->eliminarProducto($idProducto);
+            $this->guardarCarritoEnSesion($request, $carrito);
+
+            return redirect()
+                ->route('carrito.index')
+                ->with(
+                    'success',
+                    config('carrito.messages.producto_eliminado')
                 );
         }
 
@@ -106,27 +148,17 @@ class CarritoController extends Controller
     }
 
 
-    public function destroy(Request $request, string $idProducto)
-    {
-        $carrito = $this->construirCarritoDesdeSesion($request);
-        $carrito->eliminarProducto($idProducto);
-
-        $this->guardarCarritoEnSesion($request, $carrito);
-
-        return redirect()->route('carrito.index');
-    }
-
-
     public function clear(Request $request)
     {
-        $request->session()->forget('carrito');
+        $request->session()->forget(config('carrito.session_key'));
         return redirect()->route('carrito.index');
     }
-
 
     private function construirCarritoDesdeSesion(Request $request): Carrito
     {
-        $data = collect($request->session()->get('carrito', []));
+        $data = collect(
+            $request->session()->get(config('carrito.session_key'), [])
+        );
 
         if ($data->isEmpty()) {
             return new Carrito();
@@ -138,7 +170,6 @@ class CarritoController extends Controller
         )->get()->keyBy('id_producto');
 
         $items = $data->map(function ($row) use ($productos) {
-
             $producto = $productos[$row['id_producto']];
 
             return new DetalleCarrito(
@@ -157,12 +188,12 @@ class CarritoController extends Controller
     private function guardarCarritoEnSesion(Request $request, Carrito $carrito): void
     {
         $request->session()->put(
-            'carrito',
+            config('carrito.session_key'),
             $carrito->items()->mapWithKeys(fn ($item) => [
                 $item->id_producto => [
                     'id_producto' => $item->id_producto,
-                    'cantidad'    => $item->cantidad
-                ]
+                    'cantidad'    => $item->cantidad,
+                ],
             ])->toArray()
         );
     }

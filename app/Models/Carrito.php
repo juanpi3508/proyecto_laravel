@@ -6,19 +6,17 @@ use Illuminate\Support\Collection;
 
 class Carrito
 {
-    /**
-     * @var Collection<DetalleCarrito>
-     */
     protected Collection $items;
 
     protected float $iva;
 
-    public function __construct(Collection $items = null, float $iva = 0.15)
-    {
+    public function __construct(
+        Collection $items = null,
+        ?float $iva = null
+    ) {
         $this->items = $items ?? collect();
-        $this->iva = $iva;
+        $this->iva   = $iva ?? config('carrito.iva');
     }
-
 
     public function agregarProducto(DetalleCarrito $detalle): void
     {
@@ -51,7 +49,6 @@ class Carrito
         return $this->items->isEmpty();
     }
 
-
     public function subtotal(): float
     {
         return $this->items->sum(
@@ -75,7 +72,6 @@ class Carrito
             fn (DetalleCarrito $d) => $d->cantidad
         );
     }
-
 
     public function items(): Collection
     {
