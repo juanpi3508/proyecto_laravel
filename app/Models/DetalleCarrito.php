@@ -19,20 +19,20 @@ class DetalleCarrito
         ?string $descripcion = null,
         ?string $imagen = null
     ) {
-        $this->id_producto = $id_producto;
-        $this->cantidad = max(1, $cantidad);
+        $this->id_producto     = $id_producto;
         $this->precio_unitario = $precio_unitario;
-        $this->stock = max(0, $stock);
-        $this->descripcion = $descripcion;
-        $this->imagen = $imagen;
+        $this->stock           = max(0, $stock);
+        $this->descripcion     = $descripcion;
+        $this->imagen          = $imagen;
+
+        $this->cantidad = $cantidad;
 
         $this->normalizarCantidad();
     }
 
-
-    public function incrementarCantidad(int $cantidad = 1): void
+    public function incrementarCantidad(int $cantidad = null): void
     {
-        $this->cantidad += $cantidad;
+        $this->cantidad += $cantidad ?? config('carrito.cantidad.min');
         $this->normalizarCantidad();
     }
 
@@ -46,10 +46,11 @@ class DetalleCarrito
     {
         return $this->cantidad * $this->precio_unitario;
     }
+
     private function normalizarCantidad(): void
     {
-        if ($this->cantidad < 1) {
-            $this->cantidad = 1;
+        if ($this->cantidad < config('carrito.cantidad.min')) {
+            $this->cantidad = config('carrito.cantidad.min');
         }
 
         if ($this->cantidad > $this->stock) {
@@ -65,5 +66,4 @@ class DetalleCarrito
             default    => null,
         };
     }
-
 }
