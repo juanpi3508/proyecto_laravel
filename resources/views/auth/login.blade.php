@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Iniciar sesión')
+@section('title', 'KoKo Market | Iniciar sesión')
+
 
 @section('content')
     <div class="container-fluid">
