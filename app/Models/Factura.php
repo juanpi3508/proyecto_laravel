@@ -2,49 +2,46 @@
 
 namespace App\Models;
 
+use App\Constants\FacturaColumns as Col;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class Factura extends Model
 {
     protected $table = 'facturas';
-    protected $primaryKey = 'id_factura';
+    protected $primaryKey = Col::ID;
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
-        'id_factura',
-        'id_cliente',
-        'fac_subtotal',
-        'fac_iva',
-        'fac_total',
-        'fac_tipo',
-        'estado_fac'
+        Col::ID,
+        Col::CLIENTE,
+        Col::SUBTOTAL,
+        Col::IVA,
+        Col::TOTAL,
+        Col::TIPO,
+        Col::ESTADO,
     ];
-
-    /* ===================== RELACIONES ===================== */
 
     public function cliente()
     {
-        return $this->belongsTo(Cliente::class, 'id_cliente');
+        return $this->belongsTo(Cliente::class, Col::CLIENTE);
     }
 
     public function detalles()
     {
-        return $this->hasMany(ProxFac::class, 'id_factura');
+        return $this->hasMany(ProxFac::class, Col::ID);
     }
-
-    /* ===================== FACTURACIÓN ===================== */
 
     public static function generarDesdeCarrito($usuario, array $carrito): self
     {
         if (!$usuario || !$usuario->cliente) {
-            throw new \Exception('Debe completar sus datos de cliente para facturar.');
+            throw new \Exception(config('facturas.mensajes.sin_cliente'));
         }
 
         if (empty($carrito)) {
-            throw new \Exception('El carrito está vacío.');
+            throw new \Exception(config('facturas.mensajes.carrito_vacio'));
         }
 
         $productos = Product::obtenerParaCarrito($carrito);
@@ -52,26 +49,21 @@ class Factura extends Model
         [$subtotal, $iva, $total] = self::calcularTotales($productos, $carrito);
 
         return DB::transaction(function () use (
-            $usuario,
-            $productos,
-            $carrito,
-            $subtotal,
-            $iva,
-            $total
+            $usuario, $productos, $carrito, $subtotal, $iva, $total
         ) {
 
-            $idFactura = DB::selectOne(
-                'SELECT GenerarCodigoFactura() AS codigo'
+            $codigo = DB::selectOne(
+                'SELECT ' . config('facturas.db.fn_generar_codigo') . '() AS codigo'
             )->codigo;
 
             $factura = self::create([
-                'id_factura' => $idFactura,
-                'id_cliente' => $usuario->cliente->id_cliente,
-                'fac_subtotal' => $subtotal,
-                'fac_iva' => $iva,
-                'fac_total' => $total,
-                'fac_tipo' => 'ECO',
-                'estado_fac' => 'ABI',
+                Col::ID       => $codigo,
+                Col::CLIENTE  => $usuario->cliente->id_cliente,
+                Col::SUBTOTAL => $subtotal,
+                Col::IVA      => $iva,
+                Col::TOTAL    => $total,
+                Col::TIPO     => config('facturas.tipos.eco'),
+                Col::ESTADO   => config('facturas.estados.abierta'),
             ]);
 
             $factura->crearDetallesDesdeCarrito($productos, $carrito);
@@ -80,15 +72,13 @@ class Factura extends Model
         });
     }
 
-    /* ===================== CÁLCULOS ===================== */
-
     private static function calcularTotales($productos, $carrito): array
     {
         $subtotal = 0;
 
         foreach ($carrito as $item) {
             if (!isset($productos[$item['id_producto']])) {
-                throw new \Exception('Producto inválido en el carrito.');
+                throw new \Exception(config('facturas.mensajes.producto_invalido'));
             }
 
             $subtotal +=
@@ -96,49 +86,45 @@ class Factura extends Model
                 * $item['cantidad'];
         }
 
-        $iva = round($subtotal * 0.12, 2);
+        $iva = round($subtotal * config('facturas.iva'), 2);
 
         return [$subtotal, $iva, $subtotal + $iva];
     }
-
-    /* ===================== DETALLES ===================== */
 
     private function crearDetallesDesdeCarrito($productos, $carrito): void
     {
         foreach ($carrito as $item) {
             ProxFac::crearDesdeProducto(
-                $this->id_factura,
+                $this->{Col::ID},
                 $productos[$item['id_producto']],
                 $item['cantidad']
             );
         }
     }
 
-    /* ===================== APROBACIÓN ===================== */
-
     public static function aprobarPorFuncion(string $idFactura): string
     {
         $resultado = DB::selectOne(
-            "SELECT fn_aprobar_factura_json(?) AS resultado",
+            'SELECT ' . config('facturas.db.fn_aprobar') . '(?) AS resultado',
             [$idFactura]
         );
 
         $json = json_decode($resultado->resultado, true);
 
         if (!$json || !$json['ok']) {
-            throw new \Exception($json['mensaje'] ?? 'No se pudo aprobar la factura');
+            throw new \Exception(
+                $json['mensaje'] ?? config('facturas.mensajes.aprobacion_error')
+            );
         }
 
         return $json['mensaje'];
     }
 
-    /* ===================== CONSULTAS ===================== */
-
     public static function ecoPorCliente(string $idCliente)
     {
-        return self::where('id_cliente', $idCliente)
-            ->where('fac_tipo', 'ECO')
-            ->orderByDesc('fac_fecha_hora')
+        return self::where(Col::CLIENTE, $idCliente)
+            ->where(Col::TIPO, config('facturas.tipos.eco'))
+            ->orderByDesc(Col::FECHA)
             ->get();
     }
 
@@ -149,30 +135,8 @@ class Factura extends Model
         }
 
         return self::with('detalles.producto')
-            ->where('id_factura', $idFactura)
-            ->where('id_cliente', $usuario->cliente->id_cliente)
+            ->where(Col::ID, $idFactura)
+            ->where(Col::CLIENTE, $usuario->cliente->id_cliente)
             ->firstOrFail();
-    }
-
-    public static function productosMasVendidos()
-    {
-        return DB::table('proxfac as pxf')
-            ->join('productos as p', 'p.id_producto', '=', 'pxf.id_producto')
-            ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
-            ->where('f.estado_fac', 'APR')
-            ->where('pxf.estado_pxf', 'APR')
-            ->groupBy(
-                'p.id_producto',
-                'p.pro_descripcion',
-                'p.pro_precio_venta',
-                'p.pro_imagen'
-            )
-            ->select(
-                'p.*',
-                DB::raw('SUM(pxf.pxf_cantidad) AS total_vendido')
-            )
-            ->orderByDesc('total_vendido')
-            ->limit(6)
-            ->get();
     }
 }

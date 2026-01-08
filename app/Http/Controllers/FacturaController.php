@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Factura;
-use Illuminate\Support\Facades\DB;
 
 class FacturaController extends Controller
 {
@@ -15,14 +14,14 @@ class FacturaController extends Controller
         try {
             $factura = Factura::generarDesdeCarrito(
                 $usuario,
-                session('carrito', [])
+                session(config('facturas.session_carrito'), [])
             );
 
             return redirect()
                 ->route('carrito.index')
                 ->with([
                     'factura_confirmada' => true,
-                    'id_factura' => $factura->id_factura
+                    'id_factura' => $factura->id_factura,
                 ]);
 
         } catch (\Throwable $e) {
@@ -30,23 +29,23 @@ class FacturaController extends Controller
         }
     }
 
-    public function confirmar($idFactura)
+    public function confirmar(string $idFactura)
     {
         $factura = Factura::findOrFail($idFactura);
 
-        if ($factura->estado_fac !== 'ABI') {
+        if ($factura->estado_fac !== config('facturas.estados.abierta')) {
             return redirect()->route('factura.show', $idFactura);
         }
 
         return view('facturas.confirmar', compact('factura'));
     }
 
-    public function aprobar($idFactura)
+    public function aprobar(string $idFactura)
     {
         try {
             $mensaje = Factura::aprobarPorFuncion($idFactura);
 
-            session()->forget('carrito');
+            session()->forget(config('facturas.session_carrito'));
 
             return redirect()
                 ->route('catalogo.index')
@@ -64,7 +63,7 @@ class FacturaController extends Controller
         if (!$usuario->cliente) {
             return view('consultas.consulta_general', [
                 'facturas' => [],
-                'mensaje' => 'No existe información de cliente asociada.'
+                'mensaje' => config('facturas.mensajes.sin_cliente'),
             ]);
         }
 
@@ -73,12 +72,12 @@ class FacturaController extends Controller
         return view('consultas.consulta_general', [
             'facturas' => $facturas,
             'mensaje' => $facturas->isEmpty()
-                ? 'No existen compras previas registradas.'
-                : null
+                ? config('facturas.mensajes.sin_compras')
+                : null,
         ]);
     }
 
-    public function detallePopup($idFactura)
+    public function detallePopup(string $idFactura)
     {
         $factura = Factura::detalleSeguroParaUsuario(
             Auth::user(),
