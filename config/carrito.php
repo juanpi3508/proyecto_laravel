@@ -18,6 +18,7 @@ return [
         'cantidad_minima' => 'La cantidad mínima permitida es 1.',
         'cantidad_actualizada' => 'La cantidad del producto fue actualizada correctamente.',
         'producto_eliminado' => 'Producto eliminado del carrito correctamente.',
+        'carrito_vaciado' => 'El carrito fue vaciado correctamente.',
         'agregado' => 'Producto agregado al carrito correctamente.',
     ],
 

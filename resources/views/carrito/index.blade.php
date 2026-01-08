@@ -34,7 +34,7 @@
 
                 @if(session('mensaje_stock'))
                     <div class="alert alert-danger mb-3">
-                        <strong>⚠ Error de stock:</strong> {{ session('mensaje_stock') }}
+                        <strong>⚠ Error:</strong> {{ session('mensaje_stock') }}
                     </div>
                 @endif
 

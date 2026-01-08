@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\ProxFacColumns as Col;
 use Illuminate\Database\Eloquent\Model;
 
 class ProxFac extends Model
@@ -13,27 +14,23 @@ class ProxFac extends Model
     protected $primaryKey = null;
 
     protected $fillable = [
-        'id_factura',
-        'id_producto',
-        'pxf_cantidad',
-        'pxf_precio_venta',
-        'pxf_subtotal_producto',
-        'estado_pxf'
+        Col::FACTURA,
+        Col::PRODUCTO,
+        Col::CANTIDAD,
+        Col::PRECIO,
+        Col::SUBTOTAL,
+        Col::ESTADO,
     ];
-
-    /* ===================== RELACIONES ===================== */
 
     public function factura()
     {
-        return $this->belongsTo(Factura::class, 'id_factura');
+        return $this->belongsTo(Factura::class, Col::FACTURA);
     }
 
     public function producto()
     {
-        return $this->belongsTo(Product::class, 'id_producto');
+        return $this->belongsTo(Product::class, Col::PRODUCTO);
     }
-
-    /* ===================== LÓGICA DE NEGOCIO ===================== */
 
     public static function crearDesdeProducto(
         string $idFactura,
@@ -41,17 +38,18 @@ class ProxFac extends Model
         int $cantidad
     ): self {
         if ($cantidad <= 0) {
-            throw new \Exception('Cantidad inválida en detalle de factura.');
+            throw new \Exception(
+                config('facturas.mensajes.cantidad_invalida_detalle')
+            );
         }
 
         return self::create([
-            'id_factura' => $idFactura,
-            'id_producto' => $producto->id_producto,
-            'pxf_cantidad' => $cantidad,
-            'pxf_precio_venta' => $producto->pro_precio_venta,
-            'pxf_subtotal_producto' =>
-                $producto->pro_precio_venta * $cantidad,
-            'estado_pxf' => 'ABI',
+            Col::FACTURA  => $idFactura,
+            Col::PRODUCTO => $producto->id_producto,
+            Col::CANTIDAD => $cantidad,
+            Col::PRECIO   => $producto->pro_precio_venta,
+            Col::SUBTOTAL => $producto->pro_precio_venta * $cantidad,
+            Col::ESTADO   => config('facturas.estados.abierta'),
         ]);
     }
 }

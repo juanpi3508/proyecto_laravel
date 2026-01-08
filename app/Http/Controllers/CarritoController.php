@@ -150,9 +150,20 @@ class CarritoController extends Controller
 
     public function clear(Request $request)
     {
-        $request->session()->forget(config('carrito.session_key'));
+        if ($request->session()->has(config('carrito.session_key'))) {
+            $request->session()->forget(config('carrito.session_key'));
+
+            return redirect()
+                ->route('carrito.index')
+                ->with(
+                    'success',
+                    config('carrito.messages.carrito_vaciado')
+                );
+        }
+
         return redirect()->route('carrito.index');
     }
+
 
     private function construirCarritoDesdeSesion(Request $request): Carrito
     {
