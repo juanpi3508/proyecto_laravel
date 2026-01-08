@@ -13,7 +13,7 @@ class AuthController extends Controller
     {
         // Si ya está logueado, lo mandamos al catálogo
         if (Auth::check()) {
-            return redirect()->route('catalogo.index');
+            return redirect()->route('carrito.index');
         }
 
         return view('auth.login');
@@ -56,7 +56,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         // ✅ IMPORTANTE: vuelve al checkout si venía de ahí
-        return redirect()->intended(route('catalogo.index'));
+        return redirect()->intended(route('carrito.index'));
     }
 
     public function logout(Request $request)
