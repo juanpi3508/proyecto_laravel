@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\ProductColumns as Col;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -9,43 +10,41 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class Product extends Model
 {
-    protected $table = 'productos';
-    protected $primaryKey = 'id_producto';
+    protected $table = Col::TABLE;
+    protected $primaryKey = Col::PK;
 
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
-        'pro_descripcion',
-        'pro_valor_compra',
-        'pro_precio_venta',
-        'pro_saldo_inicial',
-        'pro_qty_ingresos',
-        'pro_qty_egresos',
-        'pro_qty_ajustes',
-        'estado_prod',
-        'pro_imagen',
-        'id_categoria'
+        Col::DESCRIPCION,
+        Col::VALOR_COMPRA,
+        Col::PRECIO_VENTA,
+        Col::SALDO_INICIAL,
+        Col::QTY_INGRESOS,
+        Col::QTY_EGRESOS,
+        Col::QTY_AJUSTES,
+        Col::ESTADO,
+        Col::IMAGEN,
+        Col::CATEGORIA_ID,
     ];
 
-
     protected $guarded = [
-        'pro_saldo_fin'
+        Col::SALDO_FINAL,
     ];
 
     protected $casts = [
-        'id_producto'  => 'string',
-        'id_categoria' => 'string',
+        Col::PK           => 'string',
+        Col::CATEGORIA_ID => 'string',
     ];
-
 
     public function categoria()
     {
         return $this->belongsTo(
             Category::class,
-            'id_categoria',
-            'id_categoria'
+            Col::CATEGORIA_ID,
+            Col::CATEGORIA_ID
         );
     }
 
@@ -53,20 +52,18 @@ class Product extends Model
     {
         return $this->hasMany(
             ProxFac::class,
-            'id_producto',
-            'id_producto'
+            Col::PK,
+            Col::PK
         );
     }
 
-
-
     public function getImageUrlAttribute(): string
     {
-        if (!$this->pro_imagen) {
+        if (!$this->{Col::IMAGEN}) {
             return 'https://via.placeholder.com/600x600?text=Sin+imagen';
         }
 
-        $path = trim($this->pro_imagen);
+        $path = trim($this->{Col::IMAGEN});
 
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
             return $path;
@@ -77,7 +74,7 @@ class Product extends Model
 
     public function getPrecioAttribute(): float
     {
-        return (float) ($this->pro_precio_venta ?? 0);
+        return (float) ($this->{Col::PRECIO_VENTA} ?? 0);
     }
 
     public function getPrecioAnteriorAttribute(): float
@@ -90,17 +87,15 @@ class Product extends Model
         return $this->categoria->cat_descripcion ?? 'Sin categoría';
     }
 
-
     public function getStockAttribute(): int
     {
-        return max(0, (int) ($this->pro_saldo_fin ?? 0));
+        return max(0, (int) ($this->{Col::SALDO_FINAL} ?? 0));
     }
 
     public function getTokenAttribute(): string
     {
-        return Crypt::encryptString($this->id_producto);
+        return Crypt::encryptString($this->getKey());
     }
-
 
     public function stockDisponible(): int
     {
@@ -130,17 +125,16 @@ class Product extends Model
         return ($cantidadSolicitada + $cantidadEnCarrito) <= $this->stockDisponible();
     }
 
-
     public function scopeActivos($query)
     {
-        return $query->where('estado_prod', 'ACT');
+        return $query->where(Col::ESTADO, Col::ESTADO_ACTIVO);
     }
 
     public function scopeBuscar($query, $q)
     {
         if (!empty($q)) {
             $q = mb_strtolower($q);
-            $query->whereRaw('LOWER(pro_descripcion) LIKE ?', ['%' . $q . '%']);
+            $query->whereRaw('LOWER(' . Col::DESCRIPCION . ') LIKE ?', ['%' . $q . '%']);
         }
 
         return $query;
@@ -149,7 +143,7 @@ class Product extends Model
     public function scopeFiltrarCategoria($query, $cat)
     {
         if (!empty($cat)) {
-            $query->where('id_categoria', $cat);
+            $query->where(Col::CATEGORIA_ID, $cat);
         }
 
         return $query;
@@ -158,19 +152,18 @@ class Product extends Model
     public function scopeOrdenar($query, $sort)
     {
         return match ($sort) {
-            'price-asc'  => $query->orderBy('pro_precio_venta', 'asc'),
-            'price-desc' => $query->orderBy('pro_precio_venta', 'desc'),
-            'name-asc'   => $query->orderBy('pro_descripcion', 'asc'),
-            'name-desc'  => $query->orderBy('pro_descripcion', 'desc'),
-            default      => $query->orderBy('id_producto', 'desc'),
+            'price-asc'  => $query->orderBy(Col::PRECIO_VENTA, 'asc'),
+            'price-desc' => $query->orderBy(Col::PRECIO_VENTA, 'desc'),
+            'name-asc'   => $query->orderBy(Col::DESCRIPCION, 'asc'),
+            'name-desc'  => $query->orderBy(Col::DESCRIPCION, 'desc'),
+            default      => $query->orderBy(Col::PK, 'desc'),
         };
     }
-
 
     public static function obtenerParaCarrito(array $carrito)
     {
         $ids = collect($carrito)
-            ->pluck('id_producto')
+            ->pluck(Col::PK)
             ->filter()
             ->unique()
             ->values();
@@ -179,28 +172,29 @@ class Product extends Model
             throw new \Exception('Carrito inválido.');
         }
 
-        return self::whereIn('id_producto', $ids)
+        return self::whereIn(Col::PK, $ids)
             ->get()
-            ->keyBy('id_producto');
+            ->keyBy(Col::PK);
     }
 
     public static function masVendidos(int $limit = 6)
     {
         return self::select(
-            'productos.*',
+            Col::TABLE . '.*',
             DB::raw('SUM(pxf.pxf_cantidad) AS total_vendido')
         )
-            ->join('proxfac as pxf', 'productos.id_producto', '=', 'pxf.id_producto')
+            ->join('proxfac as pxf', Col::TABLE . '.' . Col::PK, '=', 'pxf.' . Col::PK)
             ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
             ->activos()
             ->where('f.estado_fac', 'APR')
             ->where('pxf.estado_pxf', 'APR')
-            ->where('f.fac_tipo','ECO')
-            ->groupBy('productos.id_producto')
+            ->where('f.fac_tipo', 'ECO')
+            ->groupBy(Col::TABLE . '.' . Col::PK)
             ->orderByDesc('total_vendido')
             ->limit($limit)
             ->get();
     }
+
     public function scopePublico($query)
     {
         return $query->with('categoria')->activos();
@@ -230,7 +224,7 @@ class Product extends Model
         }
 
         return static::publico()
-            ->whereKey((string) $id) // usa primaryKey definido: id_producto
+            ->whereKey((string) $id)
             ->firstOrFail();
     }
 
@@ -240,7 +234,7 @@ class Product extends Model
     public static function relacionados(self $producto, int $limit = 4)
     {
         return static::publico()
-            ->where('id_categoria', $producto->id_categoria)
+            ->where(Col::CATEGORIA_ID, $producto->{Col::CATEGORIA_ID})
             ->whereKeyNot($producto->getKey())
             ->limit($limit)
             ->get();

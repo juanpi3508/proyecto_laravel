@@ -2,39 +2,39 @@
 
 namespace App\Models;
 
+use App\Constants\CategoryColumns as CatCol;
+use App\Constants\ProductColumns as ProdCol;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $table = 'categorias';
-    protected $primaryKey = 'id_categoria';
+    protected $table = CatCol::TABLE;
+    protected $primaryKey = CatCol::PK;
 
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
 
     protected $casts = [
-        'id_categoria' => 'string',
+        CatCol::PK => 'string',
     ];
 
     protected $fillable = [
-        'id_categoria',
-        'cat_descripcion',
+        CatCol::PK,
+        CatCol::DESCRIPCION,
     ];
 
     public function productos()
     {
         return $this->hasMany(
             Product::class,
-            'id_categoria',
-            'id_categoria'
+            ProdCol::CATEGORIA_ID,
+            CatCol::PK
         );
     }
 
     public static function paraCatalogo()
     {
-        return static::orderBy('cat_descripcion')->get();
+        return static::orderBy(CatCol::DESCRIPCION)->get();
     }
-
-
 }

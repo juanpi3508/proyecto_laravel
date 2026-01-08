@@ -32,7 +32,7 @@
                 </li>
                 @if($producto->categoria)
                     <li class="breadcrumb-item">
-                        <a href="{{ route('catalogo.index', ['cat' => $producto->categoria->id_categoria]) }}"
+                        <a href="{{ route('catalogo.index', ['cat' => $producto->categoria->getKey()]) }}"
                            class="text-decoration-none">
                             {{ $producto->categoria_nombre }}
                         </a>
@@ -93,7 +93,7 @@
                           id="formAgregarCarrito">
                         @csrf
 
-                        <input type="hidden" name="id_producto" value="{{ $producto->id_producto }}">
+                        <input type="hidden" name="id_producto" value="{{ $producto->getKey() }}">
 
                         <label class="form-label small fw-semibold">Cantidad</label>
                         <select name="cantidad"

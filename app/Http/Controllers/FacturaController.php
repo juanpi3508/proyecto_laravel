@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Factura;
+use App\Constants\FacturaColumns as Col;
 
 class FacturaController extends Controller
 {
@@ -21,7 +22,7 @@ class FacturaController extends Controller
                 ->route('carrito.index')
                 ->with([
                     'factura_confirmada' => true,
-                    'id_factura' => $factura->id_factura,
+                    'id_factura' => $factura->getKey(),
                 ]);
 
         } catch (\Throwable $e) {
@@ -33,7 +34,7 @@ class FacturaController extends Controller
     {
         $factura = Factura::findOrFail($idFactura);
 
-        if ($factura->estado_fac !== config('facturas.estados.abierta')) {
+        if ($factura->{Col::ESTADO} !== config('facturas.estados.abierta')) {
             return redirect()->route('factura.show', $idFactura);
         }
 
@@ -85,10 +86,5 @@ class FacturaController extends Controller
         );
 
         return view('consultas.detalle_factura_modal', compact('factura'));
-    }
-
-    public function productosMasVendidos()
-    {
-        return Factura::productosMasVendidos();
     }
 }

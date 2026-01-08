@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use App\Constants\FacturaColumns as Col;
+use App\Constants\ProductColumns as ProdCol;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class Factura extends Model
 {
-    protected $table = 'facturas';
+    protected $table = Col::TABLE;
     protected $primaryKey = Col::ID;
+
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
@@ -77,13 +79,17 @@ class Factura extends Model
         $subtotal = 0;
 
         foreach ($carrito as $item) {
-            if (!isset($productos[$item['id_producto']])) {
+            $idProducto = $item[ProdCol::PK] ?? null;
+
+            if (!$idProducto || !isset($productos[$idProducto])) {
                 throw new \Exception(config('facturas.mensajes.producto_invalido'));
             }
 
+            $cantidad = (int) ($item['cantidad'] ?? 0);
+
             $subtotal +=
-                $productos[$item['id_producto']]->pro_precio_venta
-                * $item['cantidad'];
+                ((float) $productos[$idProducto]->precioVenta())
+                * $cantidad;
         }
 
         $iva = round($subtotal * config('facturas.iva'), 2);
@@ -94,10 +100,12 @@ class Factura extends Model
     private function crearDetallesDesdeCarrito($productos, $carrito): void
     {
         foreach ($carrito as $item) {
+            $idProducto = $item[ProdCol::PK];
+
             ProxFac::crearDesdeProducto(
                 $this->{Col::ID},
-                $productos[$item['id_producto']],
-                $item['cantidad']
+                $productos[$idProducto],
+                (int) $item['cantidad']
             );
         }
     }

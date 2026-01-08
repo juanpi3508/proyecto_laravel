@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProxFac extends Model
 {
-    protected $table = 'proxfac';
+    protected $table = Col::TABLE;
 
     public $incrementing = false;
     public $timestamps = false;
@@ -43,12 +43,14 @@ class ProxFac extends Model
             );
         }
 
+        $precioUnitario = $producto->precioVenta();
+
         return self::create([
             Col::FACTURA  => $idFactura,
-            Col::PRODUCTO => $producto->id_producto,
+            Col::PRODUCTO => (string) $producto->getKey(),
             Col::CANTIDAD => $cantidad,
-            Col::PRECIO   => $producto->pro_precio_venta,
-            Col::SUBTOTAL => $producto->pro_precio_venta * $cantidad,
+            Col::PRECIO   => $precioUnitario,
+            Col::SUBTOTAL => $precioUnitario * $cantidad,
             Col::ESTADO   => config('facturas.estados.abierta'),
         ]);
     }
