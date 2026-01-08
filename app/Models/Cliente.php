@@ -2,32 +2,35 @@
 
 namespace App\Models;
 
+use App\Constants\ClienteColumns as Col;
+use App\Constants\FacturaColumns as FacCol;
+use App\Constants\UsuarioColumns as UsuCol;
 use Illuminate\Database\Eloquent\Model;
 
 class Cliente extends Model
 {
-    protected $table = 'clientes';
-    protected $primaryKey = 'id_cliente';
+    protected $table = Col::TABLE;
+    protected $primaryKey = Col::PK;
 
     public $incrementing = false;
     protected $keyType = 'string';
 
-    // Tu tabla no tiene created_at / updated_at
     public $timestamps = false;
 
-    /**
-     * Campos que TE IMPORTAN (facturación / contacto).
-     * Con esto podrás crear clientes desde Tinker si quieres.
-     */
     protected $fillable = [
-        'id_cliente',
-        'cli_nombre',
-        'cli_ruc_ced',
-        'cli_telefono',
-        'cli_mail',
-        'cli_direccion',
-        'id_ciudad',
-        'estado_cli',
+        Col::PK,
+        Col::NOMBRE,
+        Col::RUC_CED,
+        Col::TELEFONO,
+        Col::MAIL,
+        Col::DIRECCION,
+        Col::CIUDAD_ID,
+        Col::ESTADO,
+    ];
+
+    protected $casts = [
+        Col::PK => 'string',
+        Col::CIUDAD_ID => 'string',
     ];
 
     /**
@@ -35,20 +38,30 @@ class Cliente extends Model
      */
     public function usuarios()
     {
-        return $this->hasMany(Usuario::class, 'id_cliente', 'id_cliente');
+        return $this->hasMany(
+            Usuario::class,
+            Col::PK,
+            Col::PK
+        );
     }
 
     /**
-     * (Opcional) Relación con facturas si luego haces el modelo Factura
-     * public function facturas()
-     * {
-     *     return $this->hasMany(Factura::class, 'id_cliente', 'id_cliente');
-     * }
+     * Relación: un cliente puede tener muchas facturas
      */
-
     public function facturas()
     {
-        return $this->hasMany(Factura::class, 'id_cliente', 'id_cliente');
+        return $this->hasMany(
+            Factura::class,
+            Col::PK,
+            Col::PK
+        );
     }
 
+    /**
+     * Scope: clientes activos (si lo necesitas en consultas)
+     */
+    public function scopeActivos($query)
+    {
+        return $query->where(Col::ESTADO, Col::ESTADO_ACTIVO);
+    }
 }
