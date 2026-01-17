@@ -53,11 +53,22 @@ class CarritoController extends Controller
 
         $producto = Product::findOrFail($idProducto);
 
-        $mensaje = $this->cart->updateCantidad($request, $producto, (int) $request->cantidad);
+        $payload = $this->cart->updateCantidadPayload(
+            $request,
+            $producto,
+            (int) $request->cantidad
+        );
 
-        return redirect()
-            ->route('carrito.index')
-            ->with($mensaje ? 'mensaje_stock' : 'success', $mensaje ?? config('carrito.messages.cantidad_actualizada'));
+        if ($request->expectsJson()) {
+            return response()->json($payload);
+        }
+
+        // comportamiento normal (no ajax)
+        if ($payload['warning']) {
+            return redirect()->route('carrito.index')->with('mensaje_stock', $payload['warning']);
+        }
+
+        return redirect()->route('carrito.index')->with('success', config('carrito.messages.cantidad_actualizada'));
     }
 
     public function destroy(Request $request, string $idProducto)
