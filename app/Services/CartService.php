@@ -146,4 +146,53 @@ class CartService
         }
         return false;
     }
+    public function updateCantidadPayload(Request $request, Product $producto, int $cantidadSolicitada): array
+    {
+        $carrito = $this->get($request);
+
+        $cantidadFinal = $producto->normalizarCantidad($cantidadSolicitada);
+
+        foreach ($carrito->items() as $item) {
+            if ($item->id_producto === (string) $producto->getKey()) {
+                $item->actualizarCantidad($cantidadFinal);
+                break;
+            }
+        }
+
+        $this->put($request, $carrito);
+
+        $warning = null;
+        if ($cantidadFinal !== $cantidadSolicitada) {
+            if ($cantidadSolicitada < config('carrito.cantidad.min')) {
+                $warning = str_replace(
+                    ':min',
+                    config('carrito.cantidad.min'),
+                    config('carrito.messages.cantidad_minima')
+                );
+            } else {
+                $warning = config('carrito.messages.stock_insuficiente');
+            }
+        }
+
+        $item = $carrito->items()->firstWhere('id_producto', (string) $producto->getKey());
+
+        return [
+            'ok' => true,
+            'warning' => $warning,
+            'item' => [
+                'id_producto' => (string) $producto->getKey(),
+                'cantidad' => $item?->cantidad ?? 0,
+                'stock' => $item?->stock ?? $producto->stockDisponible(),
+                'subtotal' => $item?->subtotal() ?? 0,
+                'precio' => $item?->precio_unitario ?? (float) $producto->precioVenta(),
+            ],
+            'totales' => [
+                'articulos' => $carrito->totalArticulos(),
+                'subtotal' => $carrito->subtotal(),
+                'impuestos' => $carrito->impuestos(),
+                'total' => $carrito->total(),
+            ],
+        ];
+    }
+
 }

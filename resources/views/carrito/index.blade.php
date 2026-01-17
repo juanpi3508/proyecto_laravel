@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'KoKo Market | Carrito de Compras')
@@ -13,6 +14,7 @@
 
             <div class="col-lg-8 mb-4">
                 <h2 class="mb-4">Carrito de Compras</h2>
+                <div id="js-cart-warning" class="alert alert-danger mb-3 d-none"></div>
 
                 @if(session('warning'))
                     <div class="alert alert-warning mb-3">
@@ -62,7 +64,7 @@
                             $token = Crypt::encryptString($item->id_producto);
                         @endphp
 
-                        <div class="card mb-3">
+                        <div class="card mb-3 carrito-item" data-product-id="{{ $item->id_producto }}">
                             <div class="card-body">
                                 <div class="row align-items-center text-center d-none d-md-flex">
 
@@ -83,7 +85,7 @@
                                         <a href="{{ route('productos.show', $token) }}"
                                            class="d-flex align-items-center text-decoration-none text-dark">
 
-                                            <img src="{{($item->imagen) }}"
+                                            <img src="{{ $item->imagen }}"
                                                  class="rounded me-3"
                                                  style="width:60px;height:60px;object-fit:cover;"
                                                  alt="{{ $item->descripcion }}">
@@ -147,26 +149,35 @@
                                         </div>
                                     </div>
 
+
                                     <div class="col-2 fw-bold">
-                                        ${{ number_format($item->subtotal, 2) }}
+                                        $<span class="js-item-subtotal">{{ number_format($item->subtotal, 2) }}</span>
                                     </div>
 
                                 </div>
+
                                 <div class="d-md-none">
 
                                     <div class="d-flex align-items-center gap-1 w-100 overflow-hidden">
 
-                                        {{-- ELIMINAR --}}
-                                        <button type="button"
-                                                class="btn btn-link text-danger p-0 lh-1"
-                                                onclick="confirmarEliminacion(this)">
-                                            <i class="bi bi-x-lg" style="font-size:0.85rem;"></i>
-                                        </button>
+
+                                        <form method="POST"
+                                              action="{{ route('carrito.destroy', $item->id_producto) }}"
+                                              class="me-1">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button"
+                                                    class="btn btn-link text-danger p-0 lh-1"
+                                                    onclick="confirmarEliminacion(this)">
+                                                <i class="bi bi-x-lg" style="font-size:0.85rem;"></i>
+                                            </button>
+                                        </form>
 
                                         {{-- IMAGEN --}}
-                                        <img src="{{($item->imagen) }}"
+                                        <img src="{{ $item->imagen }}"
                                              class="rounded"
-                                             style="width:36px;height:36px;object-fit:cover;flex-shrink:0;">
+                                             style="width:36px;height:36px;object-fit:cover;flex-shrink:0;"
+                                             alt="{{ $item->descripcion }}">
 
                                         {{-- DESCRIPCIÓN (ULTRA COMPACTA) --}}
                                         <div class="flex-grow-1 overflow-hidden" style="line-height:1.05;">
@@ -211,9 +222,9 @@
 
                                         </div>
 
-                                        {{-- SUBTOTAL --}}
+                                        {{-- subtotal actualizable (móvil) --}}
                                         <small class="fw-bold text-nowrap flex-shrink-0">
-                                            ${{ number_format($item->subtotal, 2) }}
+                                            $<span class="js-item-subtotal">{{ number_format($item->subtotal, 2) }}</span>
                                         </small>
 
                                     </div>
@@ -245,24 +256,30 @@
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Artículos</span>
-                            <span class="fw-semibold">{{ $articulos }}</span>
+                            <span class="fw-semibold" id="js-cart-articulos">{{ $articulos }}</span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Subtotal</span>
-                            <span class="fw-semibold">${{ number_format($subtotal, 2) }}</span>
+                            <span class="fw-semibold">
+                                $<span id="js-cart-subtotal">{{ number_format($subtotal, 2) }}</span>
+                            </span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Impuestos (15%)</span>
-                            <span class="fw-semibold">${{ number_format($impuestos, 2) }}</span>
+                            <span class="fw-semibold">
+                                $<span id="js-cart-impuestos">{{ number_format($impuestos, 2) }}</span>
+                            </span>
                         </div>
 
                         <hr>
 
                         <div class="d-flex justify-content-between mb-4">
                             <span class="fw-bold fs-5">Total</span>
-                            <span class="fw-bold fs-5">${{ number_format($total, 2) }}</span>
+                            <span class="fw-bold fs-5">
+                                $<span id="js-cart-total">{{ number_format($total, 2) }}</span>
+                            </span>
                         </div>
 
                         @auth
@@ -295,6 +312,4 @@
     @push('scripts')
         <script src="{{ asset('/assets/js/carrito.js') }}"></script>
     @endpush
-
-
 @endsection
