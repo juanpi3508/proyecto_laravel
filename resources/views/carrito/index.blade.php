@@ -310,6 +310,6 @@
     @include('carrito.modals')
 
     @push('scripts')
-        <script src="{{ asset('/assets/js/carrito.js') }}"></script>
+        <script src="{{ asset('assets/js/carrito.js') }}?v={{ filemtime(public_path('assets/js/carrito.js')) }}"></script>
     @endpush
 @endsection
