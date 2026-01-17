@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'KoKo Market | Carrito de Compras')
@@ -66,6 +65,8 @@
 
                         <div class="card mb-3 carrito-item" data-product-id="{{ $item->id_producto }}">
                             <div class="card-body">
+
+                                {{-- DESKTOP --}}
                                 <div class="row align-items-center text-center d-none d-md-flex">
 
                                     <div class="col-5 d-flex align-items-center text-start">
@@ -149,54 +150,70 @@
                                         </div>
                                     </div>
 
-
                                     <div class="col-2 fw-bold">
                                         $<span class="js-item-subtotal">{{ number_format($item->subtotal, 2) }}</span>
                                     </div>
 
                                 </div>
 
+                                {{-- MÓVIL (tipo Amazon: nombre completo + link + mismo estilo del desktop) --}}
                                 <div class="d-md-none">
 
-                                    <div class="d-flex align-items-center gap-1 w-100 overflow-hidden">
+                                    {{-- Top: imagen + info --}}
+                                    <div class="d-flex gap-2 align-items-start">
 
+                                        <a href="{{ route('productos.show', $token) }}"
+                                           class="flex-shrink-0 text-decoration-none">
+                                            <img src="{{ $item->imagen }}"
+                                                 class="rounded"
+                                                 style="width:64px;height:64px;object-fit:cover;"
+                                                 alt="{{ $item->descripcion }}">
+                                        </a>
+
+                                        <div class="flex-grow-1">
+
+                                            {{-- ✅ Nombre completo + link, usando el MISMO h6 que desktop (para conservar el color/estilo) --}}
+                                            <a href="{{ route('productos.show', $token) }}"
+                                               class="text-decoration-none text-dark d-block">
+                                                <h6 class="mb-1" style="line-height:1.2;">
+                                                    {{ $item->descripcion }}
+                                                </h6>
+                                            </a>
+
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    Stock: {{ $item->stock }}
+                                                </small>
+                                                <small class="fw-semibold">
+                                                    ${{ number_format($item->precio, 2) }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Bottom: eliminar + controles + subtotal --}}
+                                    <div class="d-flex align-items-center justify-content-between mt-2">
 
                                         <form method="POST"
                                               action="{{ route('carrito.destroy', $item->id_producto) }}"
-                                              class="me-1">
+                                              class="me-2">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button"
-                                                    class="btn btn-link text-danger p-0 lh-1"
-                                                    onclick="confirmarEliminacion(this)">
-                                                <i class="bi bi-x-lg" style="font-size:0.85rem;"></i>
+                                                    class="btn btn-outline-secondary btn-sm"
+                                                    onclick="confirmarEliminacion(this)"
+                                                    aria-label="Eliminar">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
 
-                                        {{-- IMAGEN --}}
-                                        <img src="{{ $item->imagen }}"
-                                             class="rounded"
-                                             style="width:36px;height:36px;object-fit:cover;flex-shrink:0;"
-                                             alt="{{ $item->descripcion }}">
-
-                                        {{-- DESCRIPCIÓN (ULTRA COMPACTA) --}}
-                                        <div class="flex-grow-1 overflow-hidden" style="line-height:1.05;">
-                                            <small class="text-truncate d-block">
-                                                <small>{{ $item->descripcion }}</small>
-                                            </small>
-                                            <small class="text-muted d-block">
-                                                <small>${{ number_format($item->precio, 2) }}</small>
-                                            </small>
-                                        </div>
-
-                                        {{-- CANTIDAD --}}
-                                        <div class="d-flex align-items-center gap-1 flex-shrink-0 lh-1">
+                                        <div class="d-flex align-items-center gap-1">
 
                                             <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf @method('PUT')
                                                 <input type="hidden" name="cantidad" value="{{ $item->cantidad - 1 }}">
                                                 <button type="submit"
-                                                        class="btn btn-outline-secondary btn-sm px-1 py-0"
+                                                        class="btn btn-outline-secondary btn-sm px-2 py-1"
                                                     @disabled($item->cantidad <= 1)>−</button>
                                             </form>
 
@@ -207,25 +224,30 @@
                                                        value="{{ $item->cantidad }}"
                                                        min="1"
                                                        max="{{ $item->stock }}"
-                                                       class="form-control form-control-sm text-center py-0"
-                                                       style="width:40px;"
-                                                       onblur="if(this.value!=this.defaultValue)this.form.submit()">
+                                                       class="form-control form-control-sm text-center"
+                                                       style="width:56px;"
+                                                       onblur="if(this.value==''||this.value<1)this.value=1;if(this.value!=this.defaultValue)this.form.submit()"
+                                                       onkeydown="if(event.key==='Enter'){event.preventDefault();if(this.value!=this.defaultValue)this.form.submit();}">
                                             </form>
 
                                             <form method="POST" action="{{ route('carrito.update', $item->id_producto) }}">
                                                 @csrf @method('PUT')
                                                 <input type="hidden" name="cantidad" value="{{ $item->cantidad + 1 }}">
                                                 <button type="submit"
-                                                        class="btn btn-outline-secondary btn-sm px-1 py-0"
+                                                        class="btn btn-outline-secondary btn-sm px-2 py-1"
                                                     @disabled($item->cantidad >= $item->stock)>+</button>
                                             </form>
 
                                         </div>
 
-                                        {{-- subtotal actualizable (móvil) --}}
-                                        <small class="fw-bold text-nowrap flex-shrink-0">
-                                            $<span class="js-item-subtotal">{{ number_format($item->subtotal, 2) }}</span>
-                                        </small>
+                                        <div class="text-end ms-2" style="min-width:86px;">
+                                            <small class="text-muted d-block" style="line-height:1;">
+                                                Subtotal
+                                            </small>
+                                            <span class="fw-bold text-nowrap">
+                                                $<span class="js-item-subtotal">{{ number_format($item->subtotal, 2) }}</span>
+                                            </span>
+                                        </div>
 
                                     </div>
 
