@@ -2,7 +2,6 @@
 
 @section('title', 'KoKo Market | Iniciar sesión')
 
-
 @section('content')
     <div class="container-fluid">
         <div class="row min-vh-100">
@@ -42,7 +41,6 @@
                                 autocomplete="username"
                                 autofocus
                             >
-
                             @error('usu_usuario')
                             <div class="invalid-feedback d-block">
                                 {{ $message }}
@@ -62,7 +60,6 @@
                                 required
                                 autocomplete="current-password"
                             >
-
                             @error('usu_contrasena')
                             <div class="invalid-feedback d-block">
                                 {{ $message }}
@@ -70,7 +67,12 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn-login w-100">Log In</button>
+                        <button type="submit" class="btn-login w-100 mb-3">Log In</button>
+
+                        <p class="text-center text-muted">
+                            ¿No tienes cuenta?
+                            <a href="{{ route('register') }}" class="register-link-accent">Crea una ahora</a>
+                        </p>
                     </form>
 
                 </div>

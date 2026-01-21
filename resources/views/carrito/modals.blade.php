@@ -5,14 +5,39 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Pasarela de Pago</h5>
                 </div>
+
                 <div class="modal-body text-center">
-                    <p class="mb-2">Compra realizada con éxito.</p>
-                    <p class="fw-bold">Factura Nº {{ session('id_factura') }}</p>
+                    {{-- Estado normal (texto original) --}}
+                    <div class="factura-state factura-state-normal">
+                        <p class="mb-2">Compra realizada con éxito.</p>
+                        <p class="fw-bold">Factura Nº {{ session('id_factura') }}</p>
+                    </div>
+
+                    {{-- Estado cargando --}}
+                    <div class="factura-state factura-state-loading d-none">
+                        <div class="spinner-border mb-3" role="status"></div>
+                        <p class="mb-2">Confirmando tu compra...</p>
+                        <p class="text-muted mb-0">Por favor, no cierres esta ventana.</p>
+                    </div>
+
+                    {{-- Estado éxito (animación final) --}}
+                    <div class="factura-state factura-state-success d-none">
+                        <div class="display-4 text-success mb-2">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <p class="mb-2 fw-bold">¡Pago confirmado!</p>
+                        <p class="text-muted mb-0">Redirigiendo a tus compras...</p>
+                    </div>
                 </div>
+
                 <div class="modal-footer">
-                    <form method="POST" action="{{ route('factura.aprobar', session('id_factura')) }}">
+                    <form method="POST"
+                          action="{{ route('factura.aprobar', session('id_factura')) }}"
+                          id="formFacturaAprobar">
                         @csrf
-                        <button type="submit" class="btn btn-secondary">Aceptar</button>
+                        <button type="submit" class="btn btn-secondary" id="btnAceptarFactura">
+                            Aceptar
+                        </button>
                     </form>
                 </div>
             </div>
@@ -20,6 +45,7 @@
     </div>
 @endif
 
+{{-- El resto de tus modales se queda igual --}}
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
