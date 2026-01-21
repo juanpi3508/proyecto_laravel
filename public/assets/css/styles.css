@@ -1261,3 +1261,8 @@ body:has(.error-signup[style*="display: block"]) nav {
     background: #fff;
     padding: 8px;
 }
+
+.field-readonly {
+    background-color: #e9ecef;
+    color: #6c757d;
+}

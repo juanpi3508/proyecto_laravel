@@ -7,7 +7,23 @@
 @endphp
 
 @section('content')
-    <main class="container pt-5 mt-5 mb-5">
+
+    {{-- ✅ OVERLAY SOLO UNA VEZ, DESPUÉS DEL LOGIN --}}
+    @if(session()->pull('login_success'))
+        <div id="login-success-overlay"
+             class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-dark bg-opacity-75"
+             style="z-index: 9999; display: none;">
+            <div class="bg-white rounded-4 shadow p-4 text-center" style="max-width: 320px; width: 90%;">
+                <div class="spinner-border mb-3" role="status"></div>
+                <h2 class="h5 mb-2">
+                    {{ session('login_success_message', '¡Inicio de sesión exitoso!') }}
+                </h2>
+                <p class="mb-0 text-muted">Bienvenido a KoKo Market, preparando tu carrito...</p>
+            </div>
+        </div>
+    @endif
+
+    <main class="container pt-5 mt-5 mb-5 carrito-container">
 
         <div class="row">
 
@@ -156,7 +172,7 @@
 
                                 </div>
 
-                                {{-- MÓVIL (tipo Amazon: nombre completo + link + mismo estilo del desktop) --}}
+                                {{-- MÓVIL --}}
                                 <div class="d-md-none">
 
                                     {{-- Top: imagen + info --}}
@@ -172,7 +188,6 @@
 
                                         <div class="flex-grow-1">
 
-                                            {{-- ✅ Nombre completo + link, usando el MISMO h6 que desktop (para conservar el color/estilo) --}}
                                             <a href="{{ route('productos.show', $token) }}"
                                                class="text-decoration-none text-dark d-block">
                                                 <h6 class="mb-1" style="line-height:1.2;">
@@ -332,6 +347,14 @@
     @include('carrito.modals')
 
     @push('scripts')
+        {{-- jQuery (si no lo cargas ya en el layout) --}}
+        {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+
+        {{-- JS animación post-login --}}
+        <script src="{{ asset('assets/js/login-success.js') }}?v={{ filemtime(public_path('assets/js/login-success.js')) }}"></script>
+
+        {{-- JS del carrito --}}
         <script src="{{ asset('assets/js/carrito.js') }}?v={{ filemtime(public_path('assets/js/carrito.js')) }}"></script>
+        <script src="{{ asset('assets/js/factura-exito.js') }}?v={{ filemtime(public_path('assets/js/factura-exito.js')) }}"></script>
     @endpush
 @endsection

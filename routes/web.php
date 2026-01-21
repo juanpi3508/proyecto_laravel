@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ClienteLookupController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -41,7 +42,22 @@ Route::get('/historial-compras', [FacturaController::class, 'listarFacturas'])
 
 Route::get('/factura/{id}/popup', [FacturaController::class, 'detallePopup'])
     ->name('factura.popup');
-
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+// LOGIN
+// LOGIN
+Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// LOGOUT
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// REGISTRO
+Route::get('/register',  [AuthController::class, 'showRegister'])
+    ->name('register');
+
+Route::post('/register', [AuthController::class, 'register'])
+    ->name('register.store');
+
+Route::get(
+    '/clientes/buscar-por-ruc',
+    [ClienteLookupController::class, 'buscarPorRuc']
+)->name('clientes.buscarPorRuc');
