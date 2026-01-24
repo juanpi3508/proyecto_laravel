@@ -24,8 +24,7 @@ class RegisterRequest extends FormRequest
             $clienteExiste = Cliente::where(CliCol::RUC_CED, $ruc)->exists();
         }
 
-        // Si NO existe cliente → es cliente nuevo → ciudad obligatoria
-        // Si SÍ existe cliente → ciudad opcional (no la pedimos en este form)
+        // Si NO existe cliente → es cliente nuevo → todos los campos obligatorios
         $esNuevoCliente = !$clienteExiste;
 
         return [
@@ -40,13 +39,33 @@ class RegisterRequest extends FormRequest
             CliCol::RUC_CED   => [
                 'required',
                 'string',
-                // 10 o 13 dígitos numéricos
-                'regex:/^(?:\d{10}|\d{13})$/',
+                function ($attribute, $value, $fail) {
+                    $this->validarRucCedula($value, $fail);
+                },
             ],
 
-            CliCol::MAIL      => 'nullable|email|max:60',
-            CliCol::TELEFONO  => 'nullable|string|max:10',
-            CliCol::DIRECCION => 'nullable|string|max:60',
+            CliCol::MAIL      => [
+                $esNuevoCliente ? 'required' : 'nullable',
+                'email',
+                'max:60',
+            ],
+
+            CliCol::TELEFONO  => [
+                $esNuevoCliente ? 'required' : 'nullable',
+                'string',
+                'max:10',
+                function ($attribute, $value, $fail) {
+                    if ($value && !$this->validarCelular($value)) {
+                        $fail(config('register_messages.errors.celular_formato'));
+                    }
+                },
+            ],
+
+            CliCol::DIRECCION => [
+                $esNuevoCliente ? 'required' : 'nullable',
+                'string',
+                'max:60',
+            ],
 
             CliCol::CIUDAD_ID => [
                 $esNuevoCliente ? 'required' : 'nullable',
@@ -61,38 +80,81 @@ class RegisterRequest extends FormRequest
         ];
     }
 
+    /**
+     * Valida cédula (10 dígitos) o RUC (13 dígitos terminando en 001)
+     */
+    private function validarRucCedula(string $value, callable $fail): void
+    {
+        // Solo números
+        if (!preg_match('/^\d+$/', $value)) {
+            $fail(config('register_messages.errors.ruc_solo_numeros'));
+            return;
+        }
+
+        $length = strlen($value);
+
+        // Cédula: exactamente 10 dígitos
+        if ($length === 10) {
+            return; // Válido
+        }
+
+        // RUC: exactamente 13 dígitos y terminar en 001
+        if ($length === 13) {
+            if (!str_ends_with($value, '001')) {
+                $fail(config('register_messages.errors.ruc_formato_ruc'));
+            }
+            return;
+        }
+
+        // Longitud inválida
+        $fail(config('register_messages.errors.ruc_longitud'));
+    }
+
+    /**
+     * Valida que el celular empiece con 09 y tenga 10 dígitos
+     */
+    private function validarCelular(string $value): bool
+    {
+        // Debe empezar con 09 y tener exactamente 10 dígitos
+        return preg_match('/^09\d{8}$/', $value) === 1;
+    }
+
     public function messages(): array
     {
+        $errors = config('register_messages.errors');
+
         return [
             // CLIENTE
-            CliCol::NOMBRE . '.required'   => 'El nombre o razón social es obligatorio.',
-            CliCol::NOMBRE . '.string'     => 'El nombre o razón social no es válido.',
-            CliCol::NOMBRE . '.max'        => 'El nombre o razón social no debe exceder 40 caracteres.',
-            CliCol::NOMBRE . '.regex'      => 'El nombre solo puede contener letras, espacios y puntos.',
+            CliCol::NOMBRE . '.required'   => $errors['nombre_vacio'],
+            CliCol::NOMBRE . '.string'     => $errors['nombre_vacio'],
+            CliCol::NOMBRE . '.max'        => $errors['nombre_max'],
+            CliCol::NOMBRE . '.regex'      => $errors['nombre_formato'],
 
-            CliCol::RUC_CED . '.required'  => 'La cédula/RUC es obligatoria.',
-            CliCol::RUC_CED . '.string'    => 'La cédula/RUC no es válida.',
-            CliCol::RUC_CED . '.regex'     => 'La cédula/RUC debe tener exactamente 10 o 13 dígitos numéricos.',
+            CliCol::RUC_CED . '.required'  => $errors['ruc_vacio'],
+            CliCol::RUC_CED . '.string'    => $errors['ruc_vacio'],
 
-            CliCol::MAIL . '.email'        => 'El correo electrónico no tiene un formato válido.',
-            CliCol::MAIL . '.max'          => 'El correo electrónico no debe exceder 60 caracteres.',
+            CliCol::MAIL . '.required'     => $errors['email_vacio'],
+            CliCol::MAIL . '.email'        => $errors['email_formato'],
+            CliCol::MAIL . '.max'          => $errors['email_max'],
 
-            CliCol::TELEFONO . '.max'      => 'El teléfono no debe exceder 10 caracteres.',
+            CliCol::TELEFONO . '.required' => $errors['celular_vacio'],
+            CliCol::TELEFONO . '.max'      => $errors['celular_max'],
 
-            CliCol::DIRECCION . '.max'     => 'La dirección no debe exceder 60 caracteres.',
+            CliCol::DIRECCION . '.required' => $errors['direccion_vacio'],
+            CliCol::DIRECCION . '.max'      => $errors['direccion_max'],
 
-            CliCol::CIUDAD_ID . '.required' => 'La ciudad es obligatoria para nuevos clientes.',
-            CliCol::CIUDAD_ID . '.size'     => 'La ciudad debe tener exactamente 3 caracteres.',
-            CliCol::CIUDAD_ID . '.exists'   => 'La ciudad seleccionada no es válida.',
+            CliCol::CIUDAD_ID . '.required' => $errors['ciudad_requerida'],
+            CliCol::CIUDAD_ID . '.size'     => $errors['ciudad_invalida'],
+            CliCol::CIUDAD_ID . '.exists'   => $errors['ciudad_invalida'],
 
             // USUARIO
-            UsuCol::USERNAME . '.required'  => 'El nombre de usuario es obligatorio.',
-            UsuCol::USERNAME . '.max'       => 'El nombre de usuario no debe exceder 50 caracteres.',
-            UsuCol::USERNAME . '.unique'    => 'Este nombre de usuario ya está en uso.',
+            UsuCol::USERNAME . '.required'  => $errors['usuario_vacio'],
+            UsuCol::USERNAME . '.max'       => $errors['usuario_max'],
+            UsuCol::USERNAME . '.unique'    => $errors['usuario_en_uso'],
 
-            UsuCol::PASSWORD . '.required'  => 'La contraseña es obligatoria.',
-            UsuCol::PASSWORD . '.min'       => 'La contraseña debe tener al menos 8 caracteres.',
-            UsuCol::PASSWORD . '.confirmed' => 'Las contraseñas no coinciden.',
+            UsuCol::PASSWORD . '.required'  => $errors['password_vacio'],
+            UsuCol::PASSWORD . '.min'       => $errors['password_min'],
+            UsuCol::PASSWORD . '.confirmed' => $errors['password_confirmar'],
         ];
     }
 }

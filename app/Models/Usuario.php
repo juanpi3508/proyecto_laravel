@@ -24,15 +24,21 @@ class Usuario extends Authenticatable
         Col::PASSWORD,
     ];
 
-    public function getAuthPassword()
-    {
-        return $this->{Col::PASSWORD};
-    }
+    // ==================== RELACIONES ====================
 
     public function cliente()
     {
         return $this->belongsTo(Cliente::class, 'id_cliente', 'id_cliente');
     }
+
+    // ==================== AUTH ====================
+
+    public function getAuthPassword()
+    {
+        return $this->{Col::PASSWORD};
+    }
+
+    // ==================== LÓGICA DE AUTENTICACIÓN ====================
 
     /**
      * Autentica un usuario por username + password.
@@ -84,29 +90,65 @@ class Usuario extends Authenticatable
         $this->save();
     }
 
+    // ==================== LÓGICA DE REGISTRO ====================
+
     /**
-     * Lógica de dominio:
-     *  - Obtiene o crea el cliente por RUC/Cédula.
-     *  - Crea el usuario asociado a ese cliente.
+     * Registra un nuevo usuario junto con su cliente.
      *
-     * IMPORTANTE:
-     *  - Si el cliente ya existe, NO se modifican sus datos.
+     * Escenarios:
+     * 1. Cliente nuevo: crea cliente + usuario
+     * 2. Cliente existente sin usuario: usa cliente existente + crea usuario
      *
-     * @param  array $clienteData  datos de cliente (keys ClienteColumns)
-     * @param  array $usuarioData  datos de usuario (keys UsuarioColumns)
-     * @return \App\Models\Usuario
+     * Validaciones de dominio:
+     * - Si el cliente está inactivo → lanza excepción
+     * - Si el cliente ya tiene usuario → lanza excepción
+     *
+     * @param  array $clienteData  Datos del cliente (keys de ClienteColumns)
+     * @param  array $usuarioData  Datos del usuario (keys de UsuarioColumns)
+     * @param  string|null $clienteIdExistente  ID de cliente existente (escenario 2)
+     * @return self Usuario creado con su cliente cargado
+     * @throws \InvalidArgumentException Si el cliente no puede registrar usuario
      */
-    public static function registrarConCliente(array $clienteData, array $usuarioData): self
-    {
-        return DB::transaction(function () use ($clienteData, $usuarioData) {
+    public static function registrarConCliente(
+        array $clienteData,
+        array $usuarioData,
+        ?string $clienteIdExistente = null
+    ): self {
+        return DB::transaction(function () use ($clienteData, $usuarioData, $clienteIdExistente) {
 
-            // 1) Cliente: o bien existente (por RUC/Cédula) o uno nuevo
-            $cliente = Cliente::obtenerORegistrarPorIdentificacion($clienteData);
+            // 1) Obtener cliente (existente o nuevo)
+            if ($clienteIdExistente) {
+                // Escenario 2: Cliente existente proporcionado por el front
+                $cliente = Cliente::find($clienteIdExistente);
 
-            // 2) Crear usuario asociado
+                if (!$cliente) {
+                    // Fallback: buscar por RUC
+                    $cliente = Cliente::buscarPorRucCed($clienteData[CliCol::RUC_CED] ?? '');
+                }
+            } else {
+                // Buscar por RUC/Cédula
+                $cliente = Cliente::buscarPorRucCed($clienteData[CliCol::RUC_CED] ?? '');
+            }
+
+            // 2) Validar cliente existente para registro
+            if ($cliente) {
+                $cliente->validarParaRegistro(); // Lanza excepción si no es válido
+            } else {
+                // 3) Crear cliente nuevo
+                $cliente = Cliente::obtenerORegistrarPorIdentificacion($clienteData);
+            }
+
+            // 4) Refrescar cliente desde BD para asegurar que tiene ID
+            $cliente = Cliente::buscarPorRucCed($clienteData[CliCol::RUC_CED] ?? $cliente->{CliCol::RUC_CED});
+
+            if (!$cliente || empty($cliente->{CliCol::PK})) {
+                throw new \RuntimeException(config('auth_messages.errors.cliente_id_error'));
+            }
+
+            // 5) Crear usuario asociado
             $usuario = new static();
 
-            $usuario->{Col::PK}       = Str::upper(Str::random(10)); // CHAR(10)
+            $usuario->{Col::PK}       = Str::upper(Str::random(10));
             $usuario->{Col::USERNAME} = $usuarioData[Col::USERNAME];
             $usuario->{Col::PASSWORD} = Hash::make($usuarioData[Col::PASSWORD]);
             $usuario->{'id_cliente'}  = $cliente->{CliCol::PK};

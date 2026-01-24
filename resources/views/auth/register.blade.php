@@ -4,18 +4,9 @@
     use App\Constants\ClienteColumns as CliCol;
     use App\Constants\UsuarioColumns as UsuCol;
 
-    // Mostrar los campos extra si:
-    // - el usuario ya los había llenado (old),
-    // - o hubo errores de validación ligados a esos campos (típico en cliente nuevo).
-    $mostrarCamposExtra =
-        old(CliCol::CIUDAD_ID) ||
-        old(CliCol::MAIL) ||
-        old(CliCol::TELEFONO) ||
-        old(CliCol::DIRECCION) ||
-        $errors->has(CliCol::CIUDAD_ID) ||
-        $errors->has(CliCol::MAIL) ||
-        $errors->has(CliCol::TELEFONO) ||
-        $errors->has(CliCol::DIRECCION);
+    // Configuración del formulario
+    $placeholders = config('register_messages.placeholders');
+    $maxlength = config('register_messages.maxlength');
 @endphp
 
 
@@ -72,14 +63,15 @@
                                 name="{{ CliCol::RUC_CED }}"
                                 id="ruc_cedula"
                                 value="{{ old(CliCol::RUC_CED) }}"
-                                placeholder="Solo números"
+                                placeholder="{{ $placeholders['ruc_cedula'] }}"
                                 inputmode="numeric"
                                 pattern="[0-9]*"
+                                maxlength="{{ $maxlength['ruc_cedula'] }}"
                                 required
                                 data-buscar-url="{{ route('clientes.buscarPorRuc') }}"
                             >
                             @error(CliCol::RUC_CED)
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -92,11 +84,12 @@
                                 name="{{ CliCol::NOMBRE }}"
                                 id="cli_nombre"
                                 value="{{ old(CliCol::NOMBRE) }}"
-                                placeholder="Ej: Juan Pérez o Mi Empresa S.A."
+                                placeholder="{{ $placeholders['nombre'] }}"
+                                maxlength="{{ $maxlength['nombre'] }}"
                                 required
                             >
                             @error(CliCol::NOMBRE)
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -115,26 +108,29 @@
                                     name="{{ CliCol::MAIL }}"
                                     id="cli_mail"
                                     value="{{ old(CliCol::MAIL) }}"
-                                    placeholder="correo@ejemplo.com"
+                                    placeholder="{{ $placeholders['email'] }}"
+                                    maxlength="{{ $maxlength['email'] }}"
                                 >
                                 @error(CliCol::MAIL)
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            {{-- Teléfono --}}
+                            {{-- Celular --}}
                             <div class="mb-3">
-                                <label class="form-label">Teléfono</label>
+                                <label class="form-label">Celular</label>
                                 <input
                                     type="text"
                                     class="form-control register-input @error(CliCol::TELEFONO) is-invalid @enderror"
                                     name="{{ CliCol::TELEFONO }}"
                                     id="cli_telefono"
                                     value="{{ old(CliCol::TELEFONO) }}"
-                                    placeholder="Teléfono"
+                                    placeholder="{{ $placeholders['celular'] }}"
+                                    inputmode="numeric"
+                                    maxlength="{{ $maxlength['celular'] }}"
                                 >
                                 @error(CliCol::TELEFONO)
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -146,7 +142,7 @@
                                     name="{{ CliCol::CIUDAD_ID }}"
                                     id="cli_ciudad"
                                 >
-                                    <option value="">Selecciona una ciudad...</option>
+                                    <option value="">{{ $placeholders['ciudad'] }}</option>
                                     @foreach ($ciudades as $ciudad)
                                         <option
                                             value="{{ $ciudad->id_ciudad }}"
@@ -157,7 +153,7 @@
                                     @endforeach
                                 </select>
                                 @error(CliCol::CIUDAD_ID)
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -170,10 +166,11 @@
                                     name="{{ CliCol::DIRECCION }}"
                                     id="cli_direccion"
                                     value="{{ old(CliCol::DIRECCION) }}"
-                                    placeholder="Dirección"
+                                    placeholder="{{ $placeholders['direccion'] }}"
+                                    maxlength="{{ $maxlength['direccion'] }}"
                                 >
                                 @error(CliCol::DIRECCION)
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -188,47 +185,60 @@
                                 type="text"
                                 class="form-control register-input @error(\App\Constants\UsuarioColumns::USERNAME) is-invalid @enderror"
                                 name="{{ \App\Constants\UsuarioColumns::USERNAME }}"
+                                id="usu_usuario"
                                 value="{{ old(\App\Constants\UsuarioColumns::USERNAME) }}"
-                                placeholder="Nombre de usuario"
+                                placeholder="{{ $placeholders['usuario'] }}"
+                                maxlength="{{ $maxlength['usuario'] }}"
                                 required
                             >
                             @error(\App\Constants\UsuarioColumns::USERNAME)
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                             @enderror
                         </div>
 
                         {{-- Contraseña --}}
                         <div class="mb-3">
                             <label class="form-label">Contraseña</label>
-                            <input
-                                type="password"
-                                class="form-control register-input @error(\App\Constants\UsuarioColumns::PASSWORD) is-invalid @enderror"
-                                name="{{ \App\Constants\UsuarioColumns::PASSWORD }}"
-                                placeholder="Ingrese su contraseña"
-                                required
-                            >
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    class="form-control register-input @error(\App\Constants\UsuarioColumns::PASSWORD) is-invalid @enderror"
+                                    name="{{ \App\Constants\UsuarioColumns::PASSWORD }}"
+                                    id="usu_contrasena"
+                                    placeholder="{{ $placeholders['password'] }}"
+                                    maxlength="{{ $maxlength['password'] }}"
+                                    required
+                                >
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="usu_contrasena">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             @error(\App\Constants\UsuarioColumns::PASSWORD)
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" data-blade>{{ $message }}</div>
                             @enderror
                         </div>
 
                         {{-- Confirmar contraseña --}}
                         <div class="mb-3">
                             <label class="form-label">Confirmar contraseña</label>
-                            <input
-                                type="password"
-                                class="form-control register-input"
-                                name="{{ \App\Constants\UsuarioColumns::PASSWORD }}_confirmation"
-                                placeholder="Confirme su contraseña"
-                                required
-                            >
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    class="form-control register-input"
+                                    name="{{ \App\Constants\UsuarioColumns::PASSWORD }}_confirmation"
+                                    id="usu_contrasena_confirm"
+                                    placeholder="{{ $placeholders['password_c'] }}"
+                                    maxlength="{{ $maxlength['password'] }}"
+                                    required
+                                >
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="usu_contrasena_confirm">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
-
-
 
                         <button type="submit" class="btn-register w-100 mb-4" id="btn_submit_register">Sign up</button>
                     </form>
-
 
                 </div>
             </div>
@@ -238,5 +248,10 @@
 @endsection
 
 @push('scripts')
+    {{-- Pasar mensajes de configuración al JS --}}
+    <script>
+        window.REGISTER_MESSAGES = @json(config('register_messages.errors'));
+    </script>
     <script src="{{ asset('assets/js/register.js') }}"></script>
+    <script src="{{ asset('assets/js/toggle-password.js') }}"></script>
 @endpush

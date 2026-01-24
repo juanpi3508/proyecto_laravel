@@ -42,6 +42,13 @@ Route::get('/historial-compras', [FacturaController::class, 'listarFacturas'])
 
 Route::get('/factura/{id}/popup', [FacturaController::class, 'detallePopup'])
     ->name('factura.popup');
+
+Route::post('/facturas/{factura}/cancelar', [FacturaController::class, 'cancelar'])
+    ->name('factura.cancelar');
+
+Route::post('/factura/procesar-pago', [FacturaController::class, 'procesarPago'])
+    ->name('factura.procesar');
+
 // LOGIN
 // LOGIN
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');

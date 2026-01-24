@@ -1,4 +1,3 @@
-
 // public/assets/js/carrito.js
 
 let formAEliminar = null;
@@ -69,7 +68,7 @@ async function ajaxUpdateCantidad(form) {
         try {
             const j = await res.json();
             msg = j.message || msg;
-        } catch (_) {}
+        } catch (_) { }
         throw new Error(msg);
     }
 
@@ -137,7 +136,6 @@ function applyUpdateToDom(payload) {
     if (elTot) elTot.textContent = money(totales.total);
 }
 
-
 function hookAjaxUpdates() {
     // Intercepta forms PUT de carrito.update
     document.querySelectorAll('form').forEach((form) => {
@@ -165,6 +163,10 @@ function hookAjaxUpdates() {
     });
 }
 
+/* ============================
+   INICIALIZACIÓN DOM
+   ============================ */
+
 document.addEventListener('DOMContentLoaded', function () {
     // Modales delete/clear (tu lógica original)
     const btnDelete = document.getElementById('btnConfirmDelete');
@@ -179,11 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btnClear.addEventListener('click', function () {
             if (formAVaciar) formAVaciar.submit();
         });
-    }
-
-    const modalConfirmacion = document.getElementById('modalConfirmacion');
-    if (modalConfirmacion) {
-        new bootstrap.Modal(modalConfirmacion).show();
     }
 
     // ✅ Activar AJAX para + / − / input cantidad

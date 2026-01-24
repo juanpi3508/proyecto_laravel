@@ -1,7 +1,7 @@
 <div class="mb-3">
     <strong>Factura:</strong> {{ $factura->id_factura }}<br>
     <strong>Fecha:</strong>
-    {{ \Carbon\Carbon::parse($factura->fac_fecha_hora)->format('d/m/Y H:i') }}
+    {{ $factura->fecha_formateada }}
 </div>
 
 <table class="table table-sm table-hover align-middle">

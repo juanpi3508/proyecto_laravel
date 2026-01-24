@@ -43,7 +43,7 @@
                                 </td>
 
                                 <td>
-                                    {{ \Carbon\Carbon::parse($factura->fac_fecha_hora)->format('d/m/Y H:i') }}
+                                    {{ $factura->fecha_formateada }}
                                 </td>
 
                                 <td class="fw-bold text-success">
@@ -84,6 +84,10 @@
     <script>
         function abrirDetalleFactura(elemento) {
             const idFactura = elemento.dataset.id;
+            mostrarFacturaModal(idFactura);
+        }
+
+        function mostrarFacturaModal(idFactura) {
             const modalElement = document.getElementById('detalleFacturaModal');
             const modal = new bootstrap.Modal(modalElement);
             const contenedor = document.getElementById('detalleFacturaContenido');
@@ -109,6 +113,19 @@
                     modal.show();
                 });
         }
+
+        // Abrir automáticamente la factura si viene del flujo de pago
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mostrarFactura = urlParams.get('mostrar');
+
+            if (mostrarFactura) {
+                // Pequeño delay para que la página cargue completamente
+                setTimeout(() => {
+                    mostrarFacturaModal(mostrarFactura);
+                }, 300);
+            }
+        });
     </script>
 
 @endsection

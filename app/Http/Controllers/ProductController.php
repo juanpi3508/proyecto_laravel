@@ -8,40 +8,35 @@ use App\Models\Category;
 
 class ProductController extends Controller
 {
+    /**
+     * Catálogo de productos (listado + filtros + paginación).
+     */
     public function catalogo(Request $request)
     {
-        $q    = trim((string) $request->input('q', ''));
-        $cat  = $request->input('cat');
-        $sort = $request->input('sort', 'relevance');
+        // Obtenemos solo los filtros necesarios
+        $filters = $request->only(['q', 'cat', 'sort']);
 
-        // Opcional: validar sort para evitar valores raros
-        $allowedSorts = [
-            'relevance',
-            'price-asc',
-            'price-desc',
-            'name-asc',
-            'name-desc',
-        ];
-
-        if (!in_array($sort, $allowedSorts, true)) {
-            $sort = 'relevance';
-        }
-
-        $productos = Product::catalogo($q ?: null, $cat ?: null, $sort);
+        // Toda la lógica de búsqueda / orden / paginación vive en el modelo
+        $productos = Product::catalogo($filters);
 
         return view('catalogo.index', [
             'productos'  => $productos,
             'categorias' => Category::paraCatalogo(),
-            'q'          => $q,
-            'cat'        => $cat,
-            'sort'       => $sort,
+            'q'          => $filters['q']   ?? '',
+            'cat'        => $filters['cat'] ?? null,
+            'sort'       => $filters['sort'] ?? 'relevance',
         ]);
     }
 
+    /**
+     * Detalle de un producto por token público.
+     */
     public function show(string $token)
     {
+        // Lógica de búsqueda por token en el modelo
         $producto = Product::findByTokenOrFail($token);
 
+        // Lógica para traer productos relacionados en el modelo
         $relacionados = Product::relacionados($producto, 4);
 
         return view('productos.show', compact('producto', 'relacionados'));

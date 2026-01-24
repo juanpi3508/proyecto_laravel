@@ -87,4 +87,44 @@ class FacturaController extends Controller
 
         return view('consultas.detalle_factura_modal', compact('factura'));
     }
+
+    /**
+     * Procesa el pago: genera la factura y la aprueba en una sola operación.
+     * Se usa via AJAX desde el modal de pago.
+     */
+    public function procesarPago()
+    {
+        $usuario = Auth::user();
+
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'message' => config('auth_messages.errors.session_required'),
+            ], 401);
+        }
+
+        try {
+            // Delegar toda la lógica al modelo
+            $resultado = Factura::procesarPagoCompleto(
+                $usuario,
+                session(config('facturas.session_carrito'), [])
+            );
+
+            // Limpiar el carrito de sesión
+            session()->forget(config('facturas.session_carrito'));
+
+            return response()->json([
+                'success'    => true,
+                'message'    => $resultado['mensaje'],
+                'id_factura' => $resultado['factura_id'],
+                'redirect'   => route('facturas.historial', ['mostrar' => $resultado['factura_id']]),
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
 }
