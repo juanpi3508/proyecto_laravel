@@ -51,15 +51,20 @@
                         <!-- Contraseña -->
                         <div class="mb-3">
                             <label for="usu_contrasena" class="form-label login-label">Contraseña</label>
-                            <input
-                                type="password"
-                                class="form-control login-input @error('usu_contrasena') is-invalid @enderror"
-                                id="usu_contrasena"
-                                name="usu_contrasena"
-                                placeholder="********************"
-                                required
-                                autocomplete="current-password"
-                            >
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    class="form-control login-input @error('usu_contrasena') is-invalid @enderror"
+                                    id="usu_contrasena"
+                                    name="usu_contrasena"
+                                    placeholder="********************"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="usu_contrasena">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             @error('usu_contrasena')
                             <div class="invalid-feedback d-block">
                                 {{ $message }}
@@ -81,3 +86,8 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/toggle-password.js') }}"></script>
+@endpush
+

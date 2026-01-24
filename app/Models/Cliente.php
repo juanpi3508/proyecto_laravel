@@ -27,84 +27,153 @@ class Cliente extends Model
         Col::CIUDAD_ID,
         Col::ESTADO,
     ];
-    public static function buscarPorRucCed(string $ruc): ?self
-    {
-        return static::where(Col::RUC_CED, $ruc)->first();
-    }
 
     protected $casts = [
         Col::PK        => 'string',
         Col::CIUDAD_ID => 'string',
     ];
+
+    // ==================== RELACIONES ====================
+
     public function ciudad()
     {
         return $this->belongsTo(Ciudad::class, Col::CIUDAD_ID, 'id_ciudad');
     }
 
-    /**
-     * Relación: un cliente puede tener muchos usuarios
-     */
     public function usuarios()
     {
-        return $this->hasMany(
-            Usuario::class,
-            'id_cliente',   // FK en usuarios
-            Col::PK         // 'id_cliente' en clientes
-        );
-        // si luego agregas const CLIENTE_ID en UsuarioColumns:
-        // return $this->hasMany(Usuario::class, UsuCol::CLIENTE_ID, Col::PK);
+        return $this->hasMany(Usuario::class, 'id_cliente', Col::PK);
     }
 
-    /**
-     * Relación: un cliente puede tener muchas facturas
-     */
     public function facturas()
     {
-        return $this->hasMany(
-            Factura::class,
-            'id_cliente',   // FK en facturas (ajusta con FacCol si ya lo tienes)
-            Col::PK
-        );
-        // p.ej:
-        // return $this->hasMany(Factura::class, FacCol::CLIENTE_ID, Col::PK);
+        return $this->hasMany(Factura::class, 'id_cliente', Col::PK);
     }
 
-    /**
-     * Scope: clientes activos
-     */
+    // ==================== SCOPES ====================
+
     public function scopeActivos($query)
     {
         return $query->where(Col::ESTADO, Col::ESTADO_ACTIVO);
     }
 
+    // ==================== MÉTODOS DE BÚSQUEDA ====================
+
+    public static function buscarPorRucCed(string $ruc): ?self
+    {
+        return static::where(Col::RUC_CED, $ruc)->first();
+    }
+
+    // ==================== LÓGICA DE NEGOCIO ====================
+
     /**
-     * Lógica de dominio:
-     *  - Si el RUC/Cédula ya existe → devuelve ese cliente SIN modificarlo.
-     *  - Si no existe → crea un cliente nuevo con los datos recibidos.
+     * Verifica si el cliente ya tiene un usuario asociado.
+     */
+    public function tieneUsuario(): bool
+    {
+        return Usuario::where('id_cliente', $this->{Col::PK})->exists();
+    }
+
+    /**
+     * Verifica si el cliente está activo.
+     */
+    public function estaActivo(): bool
+    {
+        return ($this->{Col::ESTADO} ?? 'ACT') === 'ACT';
+    }
+
+    /**
+     * Verifica si el cliente está inactivo.
+     */
+    public function estaInactivo(): bool
+    {
+        return ($this->{Col::ESTADO} ?? 'ACT') === 'INA';
+    }
+
+    /**
+     * Valida si el cliente puede registrar un nuevo usuario.
+     * Lanza excepción con mensaje del config si no es válido.
      *
-     * @param  array $clienteData  Datos del formulario, con keys de ClienteColumns
-     * @return \App\Models\Cliente
+     * @throws \InvalidArgumentException
+     */
+    public function validarParaRegistro(): void
+    {
+        $errors = config('register_messages.errors');
+
+        if ($this->estaInactivo()) {
+            throw new \InvalidArgumentException($errors['cliente_inactivo']);
+        }
+
+        if ($this->tieneUsuario()) {
+            throw new \InvalidArgumentException($errors['cliente_con_usuario']);
+        }
+    }
+
+    /**
+     * Determina el escenario de registro para un RUC/Cédula.
+     * Usado por ClienteLookupController para devolver JSON.
+     *
+     * Retorna array con:
+     * - status: 'no_cliente' | 'cliente_sin_usuario' | 'cliente_con_usuario' | 'cliente_inactivo'
+     * - cliente: datos básicos del cliente (si aplica)
+     */
+    public static function escenarioRegistro(string $ruc): array
+    {
+        $cliente = static::buscarPorRucCed($ruc);
+
+        // Escenario 1: NO existe cliente
+        if (!$cliente) {
+            return ['status' => 'no_cliente'];
+        }
+
+        // Escenario 3a: Cliente inactivo
+        if ($cliente->estaInactivo()) {
+            return [
+                'status'  => 'cliente_inactivo',
+                'cliente' => [
+                    'id_cliente' => $cliente->{Col::PK},
+                    'cli_nombre' => $cliente->{Col::NOMBRE},
+                ],
+            ];
+        }
+
+        // Cliente activo → verificar si tiene usuario
+        if ($cliente->tieneUsuario()) {
+            // Escenario 3b: Ya tiene usuario
+            return ['status' => 'cliente_con_usuario'];
+        }
+
+        // Escenario 2: Cliente activo sin usuario
+        return [
+            'status'  => 'cliente_sin_usuario',
+            'cliente' => [
+                'id_cliente' => $cliente->{Col::PK},
+                'cli_nombre' => $cliente->{Col::NOMBRE},
+            ],
+        ];
+    }
+
+    /**
+     * Obtiene o registra un cliente por identificación (RUC/Cédula).
+     * Si ya existe, lo retorna SIN modificar.
+     * Si no existe, lo crea con los datos proporcionados.
      */
     public static function obtenerORegistrarPorIdentificacion(array $clienteData): self
     {
         $rucCed = $clienteData[Col::RUC_CED] ?? null;
 
         if (!$rucCed) {
-            // aquí puedes lanzar una excepción propia si quieres,
-            // por ahora tiramos una genérica
-            throw new \InvalidArgumentException('El campo ' . Col::RUC_CED . ' es obligatorio.');
+            throw new \InvalidArgumentException(config('auth_messages.errors.ruc_required'));
         }
 
-        // 1) ¿Ya existe un cliente con ese RUC/Cédula?
-        $clienteExistente = static::where(Col::RUC_CED, $rucCed)->first();
+        // ¿Ya existe?
+        $clienteExistente = static::buscarPorRucCed($rucCed);
 
         if ($clienteExistente) {
-            // 🔒 Regla: si existe, NO se actualiza nada.
-            // Se devuelve tal cual está en base de datos.
             return $clienteExistente;
         }
 
-        // 2) No existe → creamos un nuevo cliente con los datos del formulario
+        // No existe → crear nuevo
         $cliente = new static();
 
         $cliente->{Col::NOMBRE}    = $clienteData[Col::NOMBRE]    ?? '';
@@ -115,9 +184,9 @@ class Cliente extends Model
         $cliente->{Col::CIUDAD_ID} = $clienteData[Col::CIUDAD_ID] ?? null;
         $cliente->{Col::ESTADO}    = $clienteData[Col::ESTADO]    ?? Col::ESTADO_ACTIVO;
 
-        // OJO: no seteamos Col::PK para que lo genere el trigger.
-        $cliente->save(); // el trigger pone id_cliente
+        $cliente->save(); // El trigger genera id_cliente
 
-        return $cliente;
+        // Refrescar desde BD para obtener el ID generado
+        return static::buscarPorRucCed($rucCed);
     }
 }

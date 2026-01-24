@@ -17,4 +17,12 @@ class Ciudad extends Model
         'id_ciudad',
         'ciu_descripcion',
     ];
+
+    /**
+     * Obtiene las ciudades ordenadas por descripción para selectores.
+     */
+    public static function paraSelector(): \Illuminate\Support\Collection
+    {
+        return static::orderBy('ciu_descripcion')->get();
+    }
 }

@@ -2,10 +2,6 @@
 
 @section('title', 'KoKo Market | Carrito de Compras')
 
-@php
-    use Illuminate\Support\Facades\Crypt;
-@endphp
-
 @section('content')
 
     {{-- ✅ OVERLAY SOLO UNA VEZ, DESPUÉS DEL LOGIN --}}
@@ -75,9 +71,6 @@
                     </div>
                 @else
                     @foreach($items as $item)
-                        @php
-                            $token = Crypt::encryptString($item->id_producto);
-                        @endphp
 
                         <div class="card mb-3 carrito-item" data-product-id="{{ $item->id_producto }}">
                             <div class="card-body">
@@ -99,7 +92,7 @@
                                             </button>
                                         </form>
 
-                                        <a href="{{ route('productos.show', $token) }}"
+                                        <a href="{{ route('productos.show', $item->token) }}"
                                            class="d-flex align-items-center text-decoration-none text-dark">
 
                                             <img src="{{ $item->imagen }}"
@@ -178,7 +171,7 @@
                                     {{-- Top: imagen + info --}}
                                     <div class="d-flex gap-2 align-items-start">
 
-                                        <a href="{{ route('productos.show', $token) }}"
+                                        <a href="{{ route('productos.show', $item->token) }}"
                                            class="flex-shrink-0 text-decoration-none">
                                             <img src="{{ $item->imagen }}"
                                                  class="rounded"
@@ -188,7 +181,7 @@
 
                                         <div class="flex-grow-1">
 
-                                            <a href="{{ route('productos.show', $token) }}"
+                                            <a href="{{ route('productos.show', $item->token) }}"
                                                class="text-decoration-none text-dark d-block">
                                                 <h6 class="mb-1" style="line-height:1.2;">
                                                     {{ $item->descripcion }}
@@ -320,13 +313,12 @@
                         </div>
 
                         @auth
-                            <form method="POST" action="{{ route('factura.generar') }}">
-                                @csrf
-                                <button class="btn btn-success w-100 py-3 fw-semibold"
-                                    @disabled($items->isEmpty())>
-                                    Proceder al Pago
-                                </button>
-                            </form>
+                            <button type="button"
+                                    class="btn btn-success w-100 py-3 fw-semibold"
+                                    onclick="abrirModalPago()"
+                                @disabled($items->isEmpty())>
+                                Proceder al Pago
+                            </button>
                         @endauth
 
                         @guest

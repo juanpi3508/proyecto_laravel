@@ -81,7 +81,6 @@
                                  alt="{{ $p->pro_descripcion }}"
                                  loading="lazy">
 
-
                             <div class="card-body d-flex flex-column">
 
                                 <!-- NOMBRE -->
@@ -111,10 +110,26 @@
                             </div>
                         </a>
                     </div>
+
                 @endforeach
 
             </div>
+            <!-- PAGINACIÓN -->
+            <div class="mt-4 d-flex flex-column align-items-center gap-2">
 
+                {{-- Texto en español, controlado por ti --}}
+                <div class="text-muted small">
+                    Mostrando
+                    {{ $productos->firstItem() }}–{{ $productos->lastItem() }}
+                    de
+                    {{ $productos->total() }}
+                    productos
+                </div>
+
+                {{-- Enlaces de paginación con la vista personalizada --}}
+                {{ $productos->onEachSide(1)->links('vendor.pagination.catalogo') }}
+
+            </div>
         @else
             <!-- MENSAJE SIN RESULTADOS -->
             <div class="d-flex justify-content-center align-items-center"
@@ -132,7 +147,6 @@
 
 @endsection
 
-
 @push('scripts')
-    <script src="{{('/assets/js/catalogo-filters.js') }}"></script>
+    <script src="{{ '/assets/js/catalogo-filters.js' }}"></script>
 @endpush

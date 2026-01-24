@@ -1,8 +1,3 @@
-@php
-    $carritoSesion = session('carrito', []);
-    $cartCount = count($carritoSesion); // ✅ productos diferentes
-@endphp
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ route('home') }}">

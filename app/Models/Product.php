@@ -201,16 +201,42 @@ class Product extends Model
     }
 
     /**
-     * Catalogo completo aplicando scopes existentes.
+     *
+     * @param  array  $filters  ['q' => ?, 'cat' => ?, 'sort' => ?]
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public static function catalogo(?string $q, ?string $cat, string $sort = 'relevance')
+    public static function catalogo(array $filters = [])
     {
-        return static::publico()
+        // Normalizar filtros
+        $q    = isset($filters['q']) ? trim((string) $filters['q']) : null;
+        $cat  = $filters['cat']  ?? null;
+        $sort = $filters['sort'] ?? 'relevance';
+
+        // Aceptar solo sorts válidos
+        $allowedSorts = [
+            'relevance',
+            'price-asc',
+            'price-desc',
+            'name-asc',
+            'name-desc',
+        ];
+
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'relevance';
+        }
+
+        // Armar query usando scopes existentes
+        $query = static::publico()
             ->buscar($q)
             ->filtrarCategoria($cat)
-            ->ordenar($sort)
-            ->get();
+            ->ordenar($sort); // 'relevance' cae en el default del scopeOrdenar()
+
+        // 16 productos por página ≈ 4 filas de 4 en desktop
+        return $query
+            ->paginate(16)
+            ->withQueryString();
     }
+
 
     /**
      * Buscar un producto "publico" por token.

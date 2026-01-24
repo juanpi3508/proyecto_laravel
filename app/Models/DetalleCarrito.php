@@ -69,6 +69,7 @@ class DetalleCarrito
         return match ($name) {
             'precio'   => $this->precio_unitario,
             'subtotal' => $this->subtotal(),
+            'token'    => \Illuminate\Support\Facades\Crypt::encryptString($this->id_producto),
             default    => null,
         };
     }

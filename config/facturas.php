@@ -13,6 +13,7 @@ return [
     'estados' => [
         'abierta'   => 'ABI',
         'aprobada'  => 'APR',
+        'anulada'  => 'ANU'
     ],
 
     'mensajes' => [
@@ -22,6 +23,7 @@ return [
         'aprobacion_error' => 'No se pudo aprobar la factura.',
         'cantidad_invalida_detalle' => 'Cantidad inválida en detalle de factura.',
         'sin_compras' => 'No existen compras registradas.',
+        'factura_anulada' => 'Transacción cancelada correctamente.',
     ],
 
     'db' => [

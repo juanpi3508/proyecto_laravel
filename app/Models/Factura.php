@@ -147,4 +147,36 @@ class Factura extends Model
             ->where(Col::CLIENTE, $usuario->cliente->id_cliente)
             ->firstOrFail();
     }
+
+    /* ============================
+       PROCESAR PAGO COMPLETO
+       ============================ */
+
+    /**
+     * Procesa el pago completo: genera la factura y la aprueba atómicamente.
+     * Usado por el flujo AJAX del modal de pago.
+     *
+     * @param  mixed $usuario  Usuario autenticado
+     * @param  array $carritoSession  Contenido del carrito de sesión
+     * @return array ['factura_id' => string, 'mensaje' => string]
+     * @throws \Exception Si falla la generación o aprobación
+     */
+    public static function procesarPagoCompleto($usuario, array $carritoSession): array
+    {
+        return DB::transaction(function () use ($usuario, $carritoSession) {
+            // 1. Generar la factura desde el carrito
+            $factura = self::generarDesdeCarrito($usuario, $carritoSession);
+
+            $idFactura = $factura->getKey();
+
+            // 2. Aprobar la factura inmediatamente
+            $mensaje = self::aprobarPorFuncion($idFactura);
+
+            return [
+                'factura_id' => $idFactura,
+                'mensaje'    => $mensaje,
+            ];
+        });
+    }
 }
+
