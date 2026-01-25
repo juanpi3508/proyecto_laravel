@@ -36,6 +36,22 @@ class Factura extends Model
         return $this->hasMany(ProxFac::class, Col::ID);
     }
 
+    /**
+     * Accessor para obtener la fecha formateada en español.
+     */
+    public function getFechaFormateadaAttribute(): string
+    {
+        $fecha = $this->{Col::FECHA};
+
+        if (!$fecha) {
+            return 'Sin fecha';
+        }
+
+        return \Carbon\Carbon::parse($fecha)
+            ->locale('es')
+            ->isoFormat('D MMM YYYY, HH:mm');
+    }
+
     public static function generarDesdeCarrito($usuario, array $carrito): self
     {
         if (!$usuario || !$usuario->cliente) {
