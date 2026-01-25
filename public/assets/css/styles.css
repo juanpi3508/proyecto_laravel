@@ -57,6 +57,9 @@ h3 {
 .navbar {
     background-color: var(--brand) !important;
 }
+.navbar.sticky-top {
+    z-index: 1030;
+}
 .navbar .nav-link {
     color: var(--ink) !important;
     font-family: 'Crimson Text', serif;
