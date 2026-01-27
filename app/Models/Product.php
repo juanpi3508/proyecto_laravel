@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Constants\FacturaColumns as FacCol;
 use App\Constants\ProductColumns as Col;
+use App\Constants\ProxFacColumns as PxfCol;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Contracts\Encryption\DecryptException;
 
 class Product extends Model
 {
@@ -133,8 +134,7 @@ class Product extends Model
     public function scopeBuscar($query, $q)
     {
         if (!empty($q)) {
-            $q = mb_strtolower($q);
-            $query->whereRaw('LOWER(' . Col::DESCRIPCION . ') LIKE ?', ['%' . $q . '%']);
+            $query->where(Col::DESCRIPCION, 'ILIKE', '%' . trim($q) . '%');
         }
 
         return $query;
@@ -179,17 +179,23 @@ class Product extends Model
 
     public static function masVendidos(int $limit = 6)
     {
-        return self::select(
-            Col::TABLE . '.*',
-            DB::raw('SUM(pxf.pxf_cantidad) AS total_vendido')
-        )
-            ->join('proxfac as pxf', Col::TABLE . '.' . Col::PK, '=', 'pxf.' . Col::PK)
-            ->join('facturas as f', 'f.id_factura', '=', 'pxf.id_factura')
-            ->activos()
-            ->where('f.estado_fac', 'APR')
-            ->where('pxf.estado_pxf', 'APR')
-            ->where('f.fac_tipo', 'ECO')
-            ->groupBy(Col::TABLE . '.' . Col::PK)
+        $estadoAprobado = config('facturas.estados.aprobada');
+        $tipoEco = config('facturas.tipos.eco');
+
+        $filtroDetalles = function ($query) use ($estadoAprobado, $tipoEco) {
+            $query->where(PxfCol::ESTADO, $estadoAprobado)
+                ->whereHas('factura', function ($q) use ($estadoAprobado, $tipoEco) {
+                    $q->where(FacCol::ESTADO, $estadoAprobado)
+                      ->where(FacCol::TIPO, $tipoEco);
+                });
+        };
+
+        return self::activos()
+            ->whereHas('detallesFactura', $filtroDetalles)
+            ->withSum(
+                ['detallesFactura as total_vendido' => $filtroDetalles],
+                PxfCol::CANTIDAD
+            )
             ->orderByDesc('total_vendido')
             ->limit($limit)
             ->get();

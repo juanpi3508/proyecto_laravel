@@ -1,59 +1,240 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛒 KoKo Market
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de e-commerce desarrollado en Laravel para supermercado ecuatoriano.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat-square&logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?style=flat-square&logo=postgresql)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **PHP** >= 8.2
+- **Composer** >= 2.x
+- **Node.js** >= 18.x y npm
+- **PostgreSQL** >= 15.x
+- **Extensiones PHP**: pdo_pgsql, mbstring, openssl, tokenizer, xml, ctype, json, bcmath
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## ⚡ Instalación Rápida
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# 1. Clonar repositorio
+git clone https://github.com/tu-usuario/kokomarket.git
+cd kokomarket
 
-## Laravel Sponsors
+# 2. Instalar dependencias PHP
+composer install
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 3. Instalar dependencias JS
+npm install
 
-### Premium Partners
+# 4. Configurar entorno
+cp .env.example .env
+php artisan key:generate
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 5. Compilar assets
+npm run build
+```
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🔧 Configuración
 
-## Code of Conduct
+### Variables de Entorno (.env)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+APP_NAME="KoKo Market"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-## Security Vulnerabilities
+# Base de Datos PostgreSQL
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=kokomarket
+DB_USERNAME=usuario
+DB_PASSWORD=tu_password
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Sesión
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+```
 
-## License
+### Base de Datos
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+El sistema se conecta a una base de datos **PostgreSQL existente**. La estructura de tablas incluye:
+
+| Tabla | Descripción |
+|-------|-------------|
+| `productos` | Catálogo de productos |
+| `categorias` | Categorías de productos |
+| `clientes` | Datos de clientes |
+| `usuarios` | Usuarios del sistema |
+| `facturas` | Facturas generadas |
+| `proxfac` | Detalle de facturas |
+| `ciudades` | Catálogo de ciudades |
+
+#### Funciones PostgreSQL Requeridas
+
+```sql
+-- Generar código de factura
+CREATE OR REPLACE FUNCTION GenerarCodigoFactura() 
+RETURNS VARCHAR AS $$ ... $$;
+
+-- Aprobar factura
+CREATE OR REPLACE FUNCTION fn_aprobar_factura_json(p_id_factura VARCHAR) 
+RETURNS JSON AS $$ ... $$;
+```
+
+---
+
+## 🚀 Ejecución
+
+### Desarrollo Local
+
+```bash
+# Terminal 1: Servidor Laravel
+php artisan serve
+
+# Terminal 2: Vite (hot reload de assets)
+npm run dev
+```
+
+Acceder a: `http://localhost:8000`
+
+### Producción
+
+```bash
+# Optimizar
+php artisan optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Compilar assets
+npm run build
+
+# Servir con Nginx/Apache o usar:
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+---
+
+## 🌐 Despliegue con Cloudflare Tunnel
+
+### Instalar cloudflared
+
+```bash
+# Debian/Ubuntu
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+chmod +x cloudflared && sudo mv cloudflared /usr/local/bin/
+```
+
+### Configurar Tunnel
+
+```bash
+# Autenticar
+cloudflared tunnel login
+
+# Crear tunnel
+cloudflared tunnel create kokomarket
+
+# Configurar DNS
+cloudflared tunnel route dns kokomarket tudominio.com
+```
+
+### Archivo de Configuración
+
+`~/.cloudflared/config.yml`:
+```yaml
+tunnel: <TUNNEL_ID>
+credentials-file: ~/.cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  - hostname: tudominio.com
+    service: http://localhost:8000
+  - service: http_status:404
+```
+
+### Ejecutar
+
+```bash
+# Como servicio
+cloudflared service install
+
+# O manualmente
+cloudflared tunnel run kokomarket
+```
+
+---
+
+## 📁 Estructura Principal
+
+```
+kokomarket/
+├── app/
+│   ├── Constants/       # Constantes de columnas BD
+│   ├── Http/
+│   │   ├── Controllers/ # Controladores
+│   │   └── Requests/    # Validación de formularios
+│   ├── Models/          # Modelos Eloquent
+│   └── Services/        # Lógica de negocio
+├── config/              # Configuración
+├── public/              # Archivos públicos
+├── resources/views/     # Vistas Blade
+└── routes/web.php       # Rutas
+```
+
+---
+
+## 🔐 Características de Seguridad
+
+- Contraseñas encriptadas con **bcrypt**
+- Protección **CSRF** en formularios
+- IDs de productos encriptados en URLs
+- Bloqueo de usuario después de 5 intentos fallidos
+- Validación de cédula/RUC ecuatoriano
+
+---
+
+## 📖 Documentación
+
+Para documentación técnica detallada del sistema, ver:
+
+📄 [DOCUMENTACION_SISTEMA.md](./DOCUMENTACION_SISTEMA.md)
+
+---
+
+## 🧪 Testing
+
+```bash
+# Ejecutar tests
+php artisan test
+
+# Con cobertura
+php artisan test --coverage
+```
+
+---
+
+## 📝 Comandos Útiles
+
+```bash
+# Limpiar caché
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Ver rutas
+php artisan route:list
+
+# Verificar conexión BD
+php artisan db:show
+```
+
+
